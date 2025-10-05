@@ -52,8 +52,9 @@ void CPU::update() {
 
   QString binaryString = QString("%1").arg(operation, 32, 2, QChar('0'));
   binaryString.insert(5,'.');
-  binaryString.insert(13,'.');
-  binaryString.insert(21,'.');
+  binaryString.insert(12,'.');
+  binaryString.insert(20,'.');
+  binaryString.insert(31,'.');
   qDebug() << binaryString;
 
   qDebug() << "HEX code : " << QString::number(operation, 16);
