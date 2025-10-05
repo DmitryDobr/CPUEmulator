@@ -7,14 +7,14 @@ public:
   Memory();
 
   unsigned int read(int addr) const {
-    if (addr < 64 && addr > 0)
+    if (addr < 64 && addr > -1)
       return mem[addr];
     else
       throw "Memory cell not found";
   }
 
   void write(int addr, unsigned int val) {
-    if (addr < 64 && addr > 0)
+    if (addr < 64 && addr > -1)
       mem[addr] = val;
     else
       throw "Memory cell not found";

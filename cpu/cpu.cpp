@@ -7,6 +7,9 @@ CPU::CPU(QObject *parent) : QObject(parent) {
     pc = 0; // ставим счетчик команд
 
     cycleCounter = 0;
+    RegMemUpdatedFlag = 0;
+    lastUpdated = -1;
+    lastValue = 0;
 
     instructionsSet = new InstructionSet(this, &CPUMemory); // инициализация инструкций
 
@@ -21,17 +24,23 @@ CPU::~CPU() {
 }
 
 unsigned int CPU::getRegister(int reg) const {
-    if (reg < 16 && reg > 0)
+    if (reg < 16 && reg > -1)
         return registers[reg];
     else
         throw "register not found";
 }
 
 void CPU::setRegister(int reg, unsigned int val) {
-    if (reg < 16 && reg > 0)
+    if (reg < 16 && reg > -1)
       registers[reg] = val;
     else
-      throw "register not found";
+        throw "register not found";
+}
+
+void CPU::switchUpdated(bool isMem, int addr, unsigned int val) {
+  RegMemUpdatedFlag = int(isMem) + 1;
+  lastUpdated       = addr;
+  lastValue         = val;
 }
 
 void CPU::update() {
@@ -62,11 +71,11 @@ void CPU::update() {
     if (pc+1 >= CPUNameSpace::MEMORY_SIZE) {
       qDebug() << "STOP";
       mTimer->stop();
-      emit CPUHalt();
     }
     else
       pc++;
 
+    emit updateCPU(pc, RegMemUpdatedFlag, lastUpdated, lastValue);
 
     cycleCounter++;
 
