@@ -11,7 +11,7 @@ public:
     Instruction(CPU * cp, Memory * mem);
     virtual ~Instruction();
 
-    virtual void execute(int operand1, int operand2, int literal);
+    virtual void execute(unsigned int operand1, unsigned int operand2, unsigned int literal);
 
 protected:
     CPU * cpu;

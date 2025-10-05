@@ -10,7 +10,15 @@ class HltInstruction final : public Instruction {
 public:
     HltInstruction(CPU * cp, Memory * mem) : Instruction(cp, mem) {}
 
-    void execute(int operand1, int operand2, int literal) override;
+    void execute(unsigned int operand1, unsigned int operand2, unsigned int literal) override;
+};
+
+class MovInstruction final : public Instruction {
+// завершение работы процессора (перенос счетчика команд в последнюю ячейку памяти
+public:
+    MovInstruction(CPU * cp, Memory * mem) : Instruction(cp, mem) {}
+
+    void execute(unsigned int operand1, unsigned int operand2, unsigned int literal) override;
 };
 
 

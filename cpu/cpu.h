@@ -41,14 +41,14 @@ public:
 
   void setProgramCounter(int c) { pc = c; }
 
-  unsigned int getRegister(int reg) const;
+  unsigned int getRegister(unsigned int reg) const;
 
-  void setRegister(int reg, unsigned int val);
+  void setRegister(unsigned int reg, unsigned int val);
 
-  void switchUpdated(bool isMem,int addr, unsigned int val);
+  void switchUpdated(bool isMem, unsigned int addr, unsigned int val);
 
 signals:
-  void updateCPU(int pCounter, int FlagUpdated, int addr, unsigned int val);
+  void updateCPU(int pCounter, int FlagUpdated, unsigned int addr, unsigned int val);
 
 private slots:
 
@@ -74,7 +74,7 @@ private:
   int RegMemUpdatedFlag; // за 1 инструкцию может либо измениться регистр, либо измениться ячейка памяти
   // в конце срабатывания таймера отправляется состояние процессора (либо изменен регистр, либо изменена ячейка памяти
   // значение флага: ничего не менялось: 0, поменялся 1 регистр - 1, поменялась 1 ячейка памяти - 2
-  int lastUpdated; // запоминаем последний обновлявшийся регистр процессора или ячейку памяти (номер)
+  unsigned int lastUpdated; // запоминаем последний обновлявшийся регистр процессора или ячейку памяти (номер)
   unsigned int lastValue;   // запоминаем последнее обновленное значение с последнего обновленного регистра или ячейки
 
 };
