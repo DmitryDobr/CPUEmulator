@@ -20,6 +20,20 @@ CPU::~CPU() {
     delete instructionsSet;
 }
 
+unsigned int CPU::getRegister(int reg) const {
+    if (reg < 16 && reg > 0)
+        return registers[reg];
+    else
+        throw "register not found";
+}
+
+void CPU::setRegister(int reg, unsigned int val) {
+    if (reg < 16 && reg > 0)
+      registers[reg] = val;
+    else
+      throw "register not found";
+}
+
 void CPU::update() {
 
     qDebug() << cycleCounter << " update";
@@ -41,20 +55,19 @@ void CPU::update() {
 
     Instruction * inst = instructionsSet->getInstruction(command);
     if (inst)
-        inst->execute(0,0,0);
+      inst->execute(0,0,0);
 
 
 
     if (pc+1 >= CPUNameSpace::MEMORY_SIZE) {
-        qDebug() << "STOP";
-        mTimer->stop();
-        emit CPUHalt();
+      qDebug() << "STOP";
+      mTimer->stop();
+      emit CPUHalt();
     }
     else
-        pc++;
+      pc++;
 
-    QMap <int,int> stub;
-    emit updateCPU(pc,stub,stub);
+
     cycleCounter++;
 
 }

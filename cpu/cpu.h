@@ -41,12 +41,12 @@ public:
 
   void setProgramCounter(int c) { pc = c; }
 
-  int getRegister(int reg) const;
+  unsigned int getRegister(int reg) const;
 
-  void setRegister(int reg, int val);
+  void setRegister(int reg, unsigned int val);
 
 signals:
-  void updateCPU(int pCounter, QMap<int,int> updatedRegisters, QMap<int,int> updatedMemoryCells);
+  void updateCPU(int pCounter, bool regUpdated, int num, unsigned int val);
 
   void CPUHalt();
 
@@ -56,7 +56,7 @@ private slots:
 
 private:
   /// элементы процессора
-  int registers[16]; // регистры общего назначения (РОН) 16 регистров, размерность 32 бит
+  unsigned int registers[16]; // регистры общего назначения (РОН) 16 регистров, размерность 32 бит
   int pc; // счетчик команд
   Memory CPUMemory; // память данных и команд
   // архитектура фон-Неймана, поэтому данные и команды "физически" в одном месте
@@ -69,6 +69,11 @@ private:
   // считывать команды из памяти и выполнять их
   // команды считываются на основе счетчика команд и выполняются в соответствии с набором инструкций
   int cycleCounter; // счетчик количества исполненных "тактов"
+
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////
+  bool registerUpdated; // за 1 инструкцию может либо измениться регистр, либо измениться ячейка памяти
+  // в конце срабатывания таймера отправляется состояние процессора (либо изменен регистр, либо изменена ячейка памяти
+  int lastUpdated; // запоминаем последний обновлявшийся регистр процессора или ячейку памяти
 
 };
 

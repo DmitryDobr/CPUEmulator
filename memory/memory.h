@@ -6,9 +6,19 @@ class Memory
 public:
   Memory();
 
-  unsigned int read(int addr) const { return mem[addr]; }
+  unsigned int read(int addr) const {
+    if (addr < 64 && addr > 0)
+      return mem[addr];
+    else
+      throw "Memory cell not found";
+  }
 
-  void write(int addr, unsigned int val) { mem[addr] = val; }
+  void write(int addr, unsigned int val) {
+    if (addr < 64 && addr > 0)
+      mem[addr] = val;
+    else
+      throw "Memory cell not found";
+  }
 
 private:
   unsigned int mem[64]; // 64 ячейки по 32 бита

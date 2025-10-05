@@ -32,16 +32,14 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->tw_flag->setCellWidget(i,1,chb);
     }
 
-    connect(cpu, SIGNAL(updateCPU(int, QMap<int, int>, QMap<int, int>)), this, SLOT(updatedCPU(int, QMap<int, int>, QMap<int, int>)));
+    connect(cpu, SIGNAL(updateCPU(int, bool, int, unsigned int)), this, SLOT(updatedCPU(int, bool, int, unsigned int)));
 }
 
 MainWindow::~MainWindow() {
     delete ui;
 }
 
-void MainWindow::updatedCPU(int pCounter, QMap<int, int> updatedRegisters, QMap<int, int> updatedMemoryCells) {
-    (void)updatedRegisters;
-    (void)updatedMemoryCells;
+void MainWindow::updatedCPU(int pCounter, int regUpdated, int num, unsigned int val) {
 
     ui->le_pc->setText(QString::number(pCounter));
     ui->tw_mem->setCurrentCell(pCounter,0);

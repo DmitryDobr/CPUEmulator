@@ -18,7 +18,7 @@ public:
   ~MainWindow();
 
 private slots:
-    void updatedCPU(int pCounter, QMap<int,int> updatedRegisters, QMap<int,int> updatedMemoryCells);
+    void updatedCPU(int pCounter, int regUpdated, int num, unsigned int val);
 
 private:
   Ui::MainWindow *ui;
