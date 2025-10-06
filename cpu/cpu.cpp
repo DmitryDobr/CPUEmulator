@@ -8,9 +8,11 @@ CPU::CPU(QObject *parent) : QObject(parent) {
 
   cycleCounter = 0;
   RegMemUpdatedFlag = 0;
-  lastUpdated = -1;
+  lastUpdated = 0;
   lastValue = 0;
 
+  for (int i = 0; i < 16; i++)
+      registers[i] = 0;
   instructionsSet = new InstructionSet(this, &CPUMemory); // инициализация инструкций
 
   // создаем таймер для работы процессора
@@ -31,8 +33,10 @@ unsigned int CPU::getRegister(unsigned int reg) const {
 }
 
 void CPU::setRegister(unsigned int reg, unsigned int val) {
-  if (reg < 16)
+  if (reg < 16) {
     registers[reg] = val;
+    switchUpdated(false, reg, val);
+  }
   else
     throw "register not found";
 }
@@ -59,16 +63,19 @@ void CPU::update() {
 
   qDebug() << "HEX code : " << QString::number(operation, 16);
 
-  unsigned int command  = (operation >> CPUNameSpace::COMMAND_OFFSET); // смещение на 27 бит влево, чтобы получить 5 разрядов, определяющих номер команды в целочисленном виде
-  unsigned int operand1 = (operation >> CPUNameSpace::OPERAND1_OFFSET) & 0x7F;
-  unsigned int operand2 = (operation >> CPUNameSpace::OPERAND2_OFFSET) & 0x7F;
-  unsigned int literal  = operation & CPUNameSpace::LITERAL_MASK;
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////
+  unsigned int command  = (operation >> CPUNameSpace::COMMAND_OFFSET);
+  unsigned int operand1 = (operation >> CPUNameSpace::OPERAND1_OFFSET) & CPUNameSpace::OPERAND_MASK;
+  unsigned int operand2 = (operation >> CPUNameSpace::OPERAND2_OFFSET) & CPUNameSpace::OPERAND_MASK;
+  unsigned int literal  = (operation >> CPUNameSpace::LITERAL_OFFSET)  & CPUNameSpace::LITERAL_MASK;
+  unsigned int modificator = operation & CPUNameSpace::MODIFICATOR_MASK;
+
   qDebug() << "command no." << command;
 
 
   Instruction * inst = instructionsSet->getInstruction(command);
   if (inst)
-    inst->execute(operand1,operand2,literal);
+    inst->execute(operand1,operand2,literal,modificator);
 
 
 

@@ -24,36 +24,24 @@ Instruction *InstructionSet::getInstruction(unsigned int code) {
   return inst;
 }
 
-void HltInstruction::execute(unsigned int operand1, unsigned int operand2, unsigned int literal) {
+void HltInstruction::execute(unsigned int operand1, unsigned int operand2, unsigned int literal, unsigned int modificator) {
   (void)operand1;
   (void)operand2;
   (void)literal;
+  (void)modificator;
 
   cpu->setProgramCounter(63);
 }
 
-void MovInstruction::execute(unsigned int operand1, unsigned int operand2, unsigned int literal) {
+void MovInstruction::execute(unsigned int operand1, unsigned int operand2, unsigned int literal, unsigned int modificator) {
   // значение, сигнализирующее, что операнд 2 не используется, и в операнд 1 записывается литерал
   // 1001111
 
-    qDebug() << "mov " << operand1 << operand2 << literal;
+    unsigned int source = getSourceValue(operand2, literal, modificator);
 
-    unsigned int value = 0;
-    if (operand2 == 79) {
-        value = literal;
-    }
-    else {
-        if (operand2 >> 7) { // сдвиг на 7 разрядов дал 1 => чтение значения с ячейки памяти
-        }
-        else { // сдвиг на 7 разрядов дал 0 => чтение значения с регистра
-            value = cpu->getRegister(operand2);
-        }
-    }
+    qDebug() << "source val = " << source;
+    qDebug() << "dest num   = " << operand1;
+    qDebug() << "modificator= " << modificator;
 
-    if (operand1 >> 7) { // сдвиг на 7 разрядов дал 1 => кладем значение в ячейку памяти
-    }
-    else { // сдвиг на 7 разрядов дал 0 => кладем значение в регистр
-        cpu->setRegister(operand1,value);           // положили в регистр значение
-        cpu->switchUpdated(false,operand1,value);   // для обновления интерфейса
-    }
+    setDestinationValue(operand1, operand2, literal, modificator, source);
 }

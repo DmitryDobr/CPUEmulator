@@ -10,7 +10,7 @@ class HltInstruction final : public Instruction {
 public:
     HltInstruction(CPU * cp, Memory * mem) : Instruction(cp, mem) {}
 
-    void execute(unsigned int operand1, unsigned int operand2, unsigned int literal) override;
+    void execute(unsigned int operand1, unsigned int operand2, unsigned int literal, unsigned int modificator) override;
 };
 
 class MovInstruction final : public Instruction {
@@ -18,7 +18,7 @@ class MovInstruction final : public Instruction {
 public:
     MovInstruction(CPU * cp, Memory * mem) : Instruction(cp, mem) {}
 
-    void execute(unsigned int operand1, unsigned int operand2, unsigned int literal) override;
+    void execute(unsigned int operand1, unsigned int operand2, unsigned int literal, unsigned int modificator) override;
 };
 
 
@@ -32,7 +32,7 @@ public:
     Instruction * getInstruction(unsigned int code);
 
 private:
-    QMap <unsigned int, Instruction *> instructions;
+    QMap <unsigned int, Instruction *> instructions; // список команд процессора, каждой из которой присваивается свой адрес
 
 };
 

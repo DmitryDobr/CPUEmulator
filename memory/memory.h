@@ -6,15 +6,15 @@ class Memory
 public:
   Memory();
 
-  unsigned int read(int addr) const {
-    if (addr < 64 && addr > -1)
+  unsigned int read(unsigned int addr) const {
+    if (addr < 64)
       return mem[addr];
     else
       throw "Memory cell not found";
   }
 
-  void write(int addr, unsigned int val) {
-    if (addr < 64 && addr > -1)
+  void write(unsigned int addr, unsigned int val) {
+    if (addr < 64)
       mem[addr] = val;
     else
       throw "Memory cell not found";

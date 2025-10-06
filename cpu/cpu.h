@@ -17,11 +17,18 @@ namespace CPUNameSpace {
     Q_DECLARE_FLAGS(CPUFlags, CPUFlag)
     Q_DECLARE_OPERATORS_FOR_FLAGS(CPUFlags)
 
-    const int MEMORY_SIZE      = 64;  // количество ячеек в памяти процессора
-    const int COMMAND_OFFSET   = 27;  // смещение бит в коде операции, чтоб получить номер команды
-    const int OPERAND1_OFFSET  = 20;  // смещение бит в коде операции, чтоб получить значние 1 операнда
-    const int OPERAND2_OFFSET  = 13;  // смещение бит в коде операции, чтоб получить значние 2 операнда
-    const int LITERAL_MASK = 0x1FFF;  // битовая маска, при домножении на которую получается значение литерала
+    const int MEMORY_SIZE      = 64;    // количество ячеек в памяти процессора
+
+    const int COMMAND_OFFSET   = 27;    // смещение бит в коде операции, чтоб получить номер команды
+
+    const int OPERAND1_OFFSET  = 21;    // смещение бит в коде операции, чтоб получить значние 1 операнда
+    const int OPERAND2_OFFSET  = 15;    // смещение бит в коде операции, чтоб получить значние 2 операнда
+    const int OPERAND_MASK     = 0x3F;  // битовая маска, при домножении на которую получается значение операнда
+
+    const int LITERAL_OFFSET   = 4;     // смещение бит в коде операции, чтоб получить значние литерала
+    const int LITERAL_MASK     = 0x7FF; // битовая маска, при домножении на которую получается значение литерала
+
+    const int MODIFICATOR_MASK = 0xF;   // битовая маска, при домножении на которую получается значение модификатора
 }
 
 
@@ -37,9 +44,9 @@ public:
 
   void setFlags(CPUNameSpace::CPUFlags flags) { cpuFlags = flags; }
 
-  int programCounter() const { return pc; }
+  unsigned int programCounter() const { return pc; }
 
-  void setProgramCounter(int c) { pc = c; }
+  void setProgramCounter(unsigned int c) { pc = c; }
 
   unsigned int getRegister(unsigned int reg) const;
 
@@ -48,7 +55,7 @@ public:
   void switchUpdated(bool isMem, unsigned int addr, unsigned int val);
 
 signals:
-  void updateCPU(int pCounter, int FlagUpdated, unsigned int addr, unsigned int val);
+  void updateCPU(unsigned int pCounter, int FlagUpdated, unsigned int addr, unsigned int val);
 
 private slots:
 
@@ -57,13 +64,16 @@ private slots:
 private:
   /// элементы процессора
   unsigned int registers[16]; // регистры общего назначения (РОН) 16 регистров, размерность 32 бит
-  int pc; // счетчик команд
+  unsigned int pc; // счетчик команд
   Memory CPUMemory; // память данных и команд
   // архитектура фон-Неймана, поэтому данные и команды "физически" в одном месте
   CPUNameSpace::CPUFlags cpuFlags; // флаги состояния процессора
 
   InstructionSet * instructionsSet; // список команд процессора
 
+
+
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////////////////////////////
   QTimer * mTimer; // таймер, по срабатыванию сигнала timeout() процессор будет
   // считывать команды из памяти и выполнять их

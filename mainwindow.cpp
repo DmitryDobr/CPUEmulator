@@ -42,14 +42,14 @@ MainWindow::MainWindow(QWidget *parent) :
 
 
 
-    connect(cpu, SIGNAL(updateCPU(int, int, unsigned int, unsigned int)), this, SLOT(updatedCPU(int, int, unsigned int, unsigned int)));
+    connect(cpu, SIGNAL(updateCPU(unsigned int, int, unsigned int, unsigned int)), this, SLOT(updatedCPU(unsigned int, int, unsigned int, unsigned int)));
 }
 
 MainWindow::~MainWindow() {
     delete ui;
 }
 
-void MainWindow::updatedCPU(int pCounter, int FlagUpdated, unsigned int addr, unsigned int val) {
+void MainWindow::updatedCPU(unsigned int pCounter, int FlagUpdated, unsigned int addr, unsigned int val) {
 
     // обновили регистр
     if (FlagUpdated == 1) {
