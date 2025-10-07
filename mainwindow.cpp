@@ -40,26 +40,26 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->tw_flag->setCellWidget(i,1,chb);
     }
 
+    ui->tw_mem->setCurrentCell(0,0);
 
-
-    connect(cpu, SIGNAL(updateCPU(unsigned int, int, unsigned int, unsigned int)), this, SLOT(updatedCPU(unsigned int, int, unsigned int, unsigned int)));
+    connect(cpu, SIGNAL(updateCPU(unsigned int)), this, SLOT(on_updatedCPU(unsigned int)));
+    connect(cpu, SIGNAL(registerUpdated(unsigned int, unsigned int)), this, SLOT(on_registerUpdated(unsigned int, unsigned int)));
+    connect(cpu, SIGNAL(memoryCellUpdated(unsigned int, unsigned int)), this, SLOT(on_memoryCellUpdated(unsigned int, unsigned int)));
 }
 
 MainWindow::~MainWindow() {
     delete ui;
 }
 
-void MainWindow::updatedCPU(unsigned int pCounter, int FlagUpdated, unsigned int addr, unsigned int val) {
-
-    // обновили регистр
-    if (FlagUpdated == 1) {
-        ui->tw_reg->item(addr,0)->setText(QString::number(val));
-    }
-    // обновили ячейку памяти
-    else if (FlagUpdated == 2) {
-        ui->tw_mem->item(addr,0)->setText(QString::number(val));
-    }
-
+void MainWindow::on_updatedCPU(unsigned int pCounter) {
     ui->le_pc->setText(QString::number(pCounter));
     ui->tw_mem->setCurrentCell(pCounter,0);
+}
+
+void MainWindow::on_registerUpdated(unsigned int reg, unsigned int val) {
+    ui->tw_reg->item(reg,0)->setText(QString::number(val));
+}
+
+void MainWindow::on_memoryCellUpdated(unsigned int addr, unsigned int val) {
+    ui->tw_mem->item(addr,0)->setText(QString::number(val));
 }

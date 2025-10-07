@@ -5,15 +5,14 @@
 CPU::CPU(QObject *parent) : QObject(parent) {
   cpuFlags = CPUNameSpace::NoFlag; // ставим нулевые флаги
   pc = 0; // ставим счетчик команд
+  CPUMemory = new Memory(this);
+  connect(CPUMemory, SIGNAL(cellUpdated(unsigned int, unsigned int)), this, SIGNAL(memoryCellUpdated(unsigned int, unsigned int)));
 
   cycleCounter = 0;
-  RegMemUpdatedFlag = 0;
-  lastUpdated = 0;
-  lastValue = 0;
 
   for (int i = 0; i < 16; i++)
       registers[i] = 0;
-  instructionsSet = new InstructionSet(this, &CPUMemory); // инициализация инструкций
+  instructionsSet = new InstructionSet(this, CPUMemory); // инициализация инструкций
 
   // создаем таймер для работы процессора
   mTimer = new QTimer(this);
@@ -35,29 +34,23 @@ unsigned int CPU::getRegister(unsigned int reg) const {
 void CPU::setRegister(unsigned int reg, unsigned int val) {
   if (reg < 16) {
     registers[reg] = val;
-    switchUpdated(false, reg, val);
+    emit registerUpdated(reg, val);
   }
   else
     throw "register not found";
-}
-
-void CPU::switchUpdated(bool isMem, unsigned int addr, unsigned int val) {
-  RegMemUpdatedFlag = int(isMem) + 1;
-  lastUpdated       = addr;
-  lastValue         = val;
 }
 
 void CPU::update() {
 
   qDebug() << cycleCounter << " update";
 
-  unsigned int operation = CPUMemory.read(pc);
+  unsigned int operation = CPUMemory->read(pc);
   qDebug() << "Memory cell no. " << pc << " value = " << operation;
 
   QString binaryString = QString("%1").arg(operation, 32, 2, QChar('0'));
   binaryString.insert(5,'.');
   binaryString.insert(12,'.');
-  binaryString.insert(20,'.');
+  binaryString.insert(19,'.');
   binaryString.insert(31,'.');
   qDebug() << binaryString;
 
@@ -86,9 +79,7 @@ void CPU::update() {
   else
     pc++;
 
-  emit updateCPU(pc, RegMemUpdatedFlag, lastUpdated, lastValue);
-
-  RegMemUpdatedFlag = 0;
+  emit updateCPU(pc);
 
   cycleCounter++;
 }

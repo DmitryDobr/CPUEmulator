@@ -37,7 +37,7 @@ class CPU : public QObject
   Q_OBJECT
 
 public:
-  CPU(QObject *parent = nullptr);
+  explicit CPU(QObject *parent = nullptr);
   ~CPU();
 
   CPUNameSpace::CPUFlags flags() const { return cpuFlags; }
@@ -52,41 +52,31 @@ public:
 
   void setRegister(unsigned int reg, unsigned int val);
 
-  void switchUpdated(bool isMem, unsigned int addr, unsigned int val);
-
 signals:
-  void updateCPU(unsigned int pCounter, int FlagUpdated, unsigned int addr, unsigned int val);
+  void updateCPU(unsigned int pCounter);
+
+  void registerUpdated(unsigned int reg, unsigned int val);
+
+  void memoryCellUpdated(unsigned int addr, unsigned int val);
 
 private slots:
-
   void update();
 
 private:
   /// элементы процессора
   unsigned int registers[16]; // регистры общего назначения (РОН) 16 регистров, размерность 32 бит
   unsigned int pc; // счетчик команд
-  Memory CPUMemory; // память данных и команд
+  Memory * CPUMemory; // память данных и команд
   // архитектура фон-Неймана, поэтому данные и команды "физически" в одном месте
   CPUNameSpace::CPUFlags cpuFlags; // флаги состояния процессора
 
   InstructionSet * instructionsSet; // список команд процессора
 
-
-
-  ////////////////////////////////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////////////////////////////
   QTimer * mTimer; // таймер, по срабатыванию сигнала timeout() процессор будет
   // считывать команды из памяти и выполнять их
   // команды считываются на основе счетчика команд и выполняются в соответствии с набором инструкций
   int cycleCounter; // счетчик количества исполненных "тактов"
-
-  ////////////////////////////////////////////////////////////////////////////////////////////////////////
-  int RegMemUpdatedFlag; // за 1 инструкцию может либо измениться регистр, либо измениться ячейка памяти
-  // в конце срабатывания таймера отправляется состояние процессора (либо изменен регистр, либо изменена ячейка памяти
-  // значение флага: ничего не менялось: 0, поменялся 1 регистр - 1, поменялась 1 ячейка памяти - 2
-  unsigned int lastUpdated; // запоминаем последний обновлявшийся регистр процессора или ячейку памяти (номер)
-  unsigned int lastValue;   // запоминаем последнее обновленное значение с последнего обновленного регистра или ячейки
-
 };
 
 #endif // CPU_H

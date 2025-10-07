@@ -18,7 +18,11 @@ public:
   ~MainWindow();
 
 private slots:
-    void updatedCPU(unsigned int pCounter, int FlagUpdated, unsigned int addr, unsigned int val);
+    void on_updatedCPU(unsigned int pCounter);
+
+    void on_registerUpdated(unsigned int reg, unsigned int val);
+
+    void on_memoryCellUpdated(unsigned int addr, unsigned int val);
 
 private:
   Ui::MainWindow *ui;

@@ -37,11 +37,16 @@ void MovInstruction::execute(unsigned int operand1, unsigned int operand2, unsig
   // значение, сигнализирующее, что операнд 2 не используется, и в операнд 1 записывается литерал
   // 1001111
 
+    qDebug() << "operand 1   = " << operand1;
+    qDebug() << "operand 2   = " << operand2;
+    qDebug() << "literal     = " << literal;
+    qDebug() << "modificator = " << modificator;
+
     unsigned int source = getSourceValue(operand2, literal, modificator);
 
-    qDebug() << "source val = " << source;
-    qDebug() << "dest num   = " << operand1;
-    qDebug() << "modificator= " << modificator;
+    qDebug() << "source val  = " << source;
+    qDebug() << "dest addr   = " << operand1;
+    qDebug() << "modificator = " << modificator;
 
     setDestinationValue(operand1, operand2, literal, modificator, source);
 }

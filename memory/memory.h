@@ -1,24 +1,21 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
-class Memory
+#include <QObject>
+
+class Memory : public QObject
 {
+  Q_OBJECT
+
 public:
-  Memory();
+  explicit Memory(QObject *parent = nullptr);
 
-  unsigned int read(unsigned int addr) const {
-    if (addr < 64)
-      return mem[addr];
-    else
-      throw "Memory cell not found";
-  }
+  unsigned int read(unsigned int addr) const;
 
-  void write(unsigned int addr, unsigned int val) {
-    if (addr < 64)
-      mem[addr] = val;
-    else
-      throw "Memory cell not found";
-  }
+  void write(unsigned int addr, unsigned int val);
+
+signals:
+  void cellUpdated(unsigned int addr, unsigned int val);
 
 private:
   unsigned int mem[64]; // 64 ячейки по 32 бита
