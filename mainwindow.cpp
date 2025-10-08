@@ -36,7 +36,7 @@ MainWindow::MainWindow(QWidget *parent) :
     for (int i = 0; i < ui->tw_flag->rowCount(); i++) {
         QCheckBox * chb = new QCheckBox(this);
         chb->setStyleSheet("padding-left: 50%;");
-        chb->setChecked(true);
+        chb->setChecked(false);
         ui->tw_flag->setCellWidget(i,1,chb);
     }
 

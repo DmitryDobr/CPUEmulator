@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>913</width>
-    <height>504</height>
+    <height>630</height>
    </rect>
   </property>
   <property name="font">
@@ -46,7 +46,7 @@
       <x>510</x>
       <y>50</y>
       <width>391</width>
-      <height>381</height>
+      <height>515</height>
      </rect>
     </property>
     <property name="verticalScrollBarPolicy">
@@ -63,6 +63,9 @@
     </property>
     <attribute name="horizontalHeaderDefaultSectionSize">
      <number>275</number>
+    </attribute>
+    <attribute name="verticalHeaderDefaultSectionSize">
+     <number>30</number>
     </attribute>
     <column>
      <property name="text">

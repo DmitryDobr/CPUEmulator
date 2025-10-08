@@ -7,6 +7,13 @@
 InstructionSet::InstructionSet(CPU *cpu, Memory *mem) {
   instructions.insert(0x1F, new HltInstruction(cpu, mem)); // 31
   instructions.insert(0xE, new MovInstruction(cpu, mem));  // 14
+
+  instructions.insert(0x1, new AddInstruction(cpu, mem));  // 1
+  instructions.insert(0x2, new SubInstruction(cpu, mem));  // 2
+  instructions.insert(0x3, new MulInstruction(cpu, mem));  // 3
+  instructions.insert(0x4, new DivInstruction(cpu, mem));  // 4
+  instructions.insert(0x5, new IncInstruction(cpu, mem));  // 5
+  instructions.insert(0x6, new DecInstruction(cpu, mem));  // 6
 }
 
 InstructionSet::~InstructionSet() {
@@ -34,19 +41,62 @@ void HltInstruction::execute(unsigned int operand1, unsigned int operand2, unsig
 }
 
 void MovInstruction::execute(unsigned int operand1, unsigned int operand2, unsigned int literal, unsigned int modificator) {
-  // значение, сигнализирующее, что операнд 2 не используется, и в операнд 1 записывается литерал
-  // 1001111
+  unsigned int source = getSourceValue(operand2, literal, modificator);
 
-    qDebug() << "operand 1   = " << operand1;
-    qDebug() << "operand 2   = " << operand2;
-    qDebug() << "literal     = " << literal;
-    qDebug() << "modificator = " << modificator;
+  setDestinationValue(operand1, operand2, literal, modificator, source);
+}
 
-    unsigned int source = getSourceValue(operand2, literal, modificator);
+void AddInstruction::execute(unsigned int operand1, unsigned int operand2, unsigned int literal, unsigned int modificator) {
+  unsigned int source = getSourceValue(operand2, literal, modificator);
+  unsigned int destin = getDestinationValue(operand1, operand2, literal, modificator);
 
-    qDebug() << "source val  = " << source;
-    qDebug() << "dest addr   = " << operand1;
-    qDebug() << "modificator = " << modificator;
+  setDestinationValue(operand1, operand2, literal, modificator, destin+source);
+}
 
-    setDestinationValue(operand1, operand2, literal, modificator, source);
+void SubInstruction::execute(unsigned int operand1, unsigned int operand2, unsigned int literal, unsigned int modificator) {
+  unsigned int source = getSourceValue(operand2, literal, modificator);
+  unsigned int destin = getDestinationValue(operand1, operand2, literal, modificator);
+
+  setDestinationValue(operand1, operand2, literal, modificator, destin-source);
+}
+
+void MulInstruction::execute(unsigned int operand1, unsigned int operand2, unsigned int literal, unsigned int modificator) {
+  unsigned int source = getSourceValue(operand2, literal, modificator);
+  unsigned int destin = getDestinationValue(operand1, operand2, literal, modificator);
+
+  setDestinationValue(operand1, operand2, literal, modificator, destin*source);
+}
+
+void DivInstruction::execute(unsigned int operand1, unsigned int operand2, unsigned int literal, unsigned int modificator) {
+  unsigned int source = getSourceValue(operand2, literal, modificator);
+  unsigned int destin = getDestinationValue(operand1, operand2, literal, modificator);
+
+  setDestinationValue(operand1, operand2, literal, modificator, destin/source);
+}
+
+void IncInstruction::execute(unsigned int operand1, unsigned int operand2, unsigned int literal, unsigned int modificator) {
+  unsigned int destin = getDestinationValue(operand1, operand2, literal, modificator);
+
+  setDestinationValue(operand1, operand2, literal, modificator, destin+1);
+}
+
+void DecInstruction::execute(unsigned int operand1, unsigned int operand2, unsigned int literal, unsigned int modificator) {
+  unsigned int destin = getDestinationValue(operand1, operand2, literal, modificator);
+
+  setDestinationValue(operand1, operand2, literal, modificator, destin-1);
+}
+
+void CmpInstruction::execute(unsigned int operand1, unsigned int operand2, unsigned int literal, unsigned int modificator) {
+  unsigned int source = getSourceValue(operand2, literal, modificator);
+  unsigned int destin = getDestinationValue(operand1, operand2, literal, modificator);
+
+  if (destin == source) {
+    cpu->setFlags(cpu->flags() & CPUNameSpace::ZeroFlag);
+  }
+  else if (destin > source) {
+    cpu->setFlags(cpu->flags() & !CPUNameSpace::SignFlag);
+  }
+  else if (destin < source) {
+    cpu->setFlags(cpu->flags() & CPUNameSpace::SignFlag);
+  }
 }

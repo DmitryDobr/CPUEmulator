@@ -42,19 +42,13 @@ void CPU::setRegister(unsigned int reg, unsigned int val) {
 
 void CPU::update() {
 
-  qDebug() << cycleCounter << " update";
+  emit updateCPU(pc);
+
+  qDebug() << "==========================================================================================";
+  qDebug() << cycleCounter << " >>>>>>";
 
   unsigned int operation = CPUMemory->read(pc);
   qDebug() << "Memory cell no. " << pc << " value = " << operation;
-
-  QString binaryString = QString("%1").arg(operation, 32, 2, QChar('0'));
-  binaryString.insert(5,'.');
-  binaryString.insert(12,'.');
-  binaryString.insert(19,'.');
-  binaryString.insert(31,'.');
-  qDebug() << binaryString;
-
-  qDebug() << "HEX code : " << QString::number(operation, 16);
 
   /////////////////////////////////////////////////////////////////////////////////////////////////////////
   unsigned int command  = (operation >> CPUNameSpace::COMMAND_OFFSET);
@@ -71,15 +65,17 @@ void CPU::update() {
     inst->execute(operand1,operand2,literal,modificator);
 
 
-
   if (pc+1 >= CPUNameSpace::MEMORY_SIZE) {
     qDebug() << "STOP";
     mTimer->stop();
+    QTimer::singleShot(1000, this, [this]() {
+      emit updateCPU(pc);
+    });
   }
   else
     pc++;
 
-  emit updateCPU(pc);
+
 
   cycleCounter++;
 }
