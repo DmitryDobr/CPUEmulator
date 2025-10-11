@@ -14,6 +14,13 @@ InstructionSet::InstructionSet(CPU *cpu, Memory *mem) {
   instructions.insert(0x4, new DivInstruction(cpu, mem));  // 4
   instructions.insert(0x5, new IncInstruction(cpu, mem));  // 5
   instructions.insert(0x6, new DecInstruction(cpu, mem));  // 6
+  instructions.insert(0x7, new CmpInstruction(cpu, mem));  // 7
+
+  instructions.insert(0x8, new AndInstruction(cpu, mem));  // 8
+  instructions.insert(0x9, new OrInstruction(cpu, mem));   // 9
+  instructions.insert(0xA, new NotInstruction(cpu, mem));  // 10
+  instructions.insert(0xB, new XorInstruction(cpu, mem));  // 11
+
 }
 
 InstructionSet::~InstructionSet() {

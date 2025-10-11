@@ -18,13 +18,15 @@ SOURCES += main.cpp\
     instruction/instruction.cpp \
     instruction/instructionset.cpp \
     memory/memory.cpp \
-    instruction/arithmetic.cpp
+    instruction/arithmetic.cpp \
+    instruction/boolean.cpp
 
 HEADERS  += mainwindow.h \
     cpu/cpu.h \
     instruction/instruction.h \
     instruction/instructionset.h \
     memory/memory.h \
-    instruction/arithmetic.h
+    instruction/arithmetic.h \
+    instruction/boolean.h
 
 FORMS    += mainwindow.ui

@@ -5,6 +5,7 @@
 
 #include "instruction.h"
 #include "arithmetic.h"
+#include "boolean.h"
 
 class HltInstruction final : public Instruction {
 // завершение работы процессора (перенос счетчика команд в последнюю ячейку памяти
