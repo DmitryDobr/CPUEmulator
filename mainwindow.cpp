@@ -10,17 +10,21 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     cpu = new CPU(this); // инициализация процессора
+    unsigned int * val = (unsigned int *)cpu->memory()->dataPtr(); // при инициализации в память уже что-то внесено (пока так)
 
     // настройка интерфейса
-    ui->tw_mem->setRowCount(64);
+    ui->tw_mem->setRowCount(64); // заголовки строк
     QStringList l;
     for (int i = 0; i < 64; i++){
-        l.append("0x"+QString("%1").arg(i, 4, 16, QChar('0')));
+        l.append("0x"+QString("%1").arg(i, 3, 16, QChar('0')));
         QTableWidgetItem * ti = new QTableWidgetItem;
-        ti->setText(QString("%1").arg(0, 8, 16, QChar('0')));
+
+        ti->setText(QString("%1").arg(*val, 12, 10, QChar('0')));
         ti->setFlags(ti->flags() & 0xfffffffd);
         ti->setTextAlignment(Qt::AlignCenter);
         ui->tw_mem->setItem(i,0,ti);
+
+        val = val + 1;
     }
     ui->tw_mem->setVerticalHeaderLabels(l);
 
@@ -54,6 +58,20 @@ MainWindow::~MainWindow() {
 void MainWindow::on_updatedCPU(unsigned int pCounter) {
     ui->le_pc->setText(QString::number(pCounter));
     ui->tw_mem->setCurrentCell(pCounter,0);
+
+    // обновляем флаги в интерфейсе
+    QCheckBox * chb;
+    chb = (QCheckBox *)(ui->tw_flag->cellWidget(0, 1));
+    if (chb)
+        chb->setChecked(cpu->flags() & CPUNameSpace::SignFlag);
+
+    chb = (QCheckBox *)(ui->tw_flag->cellWidget(1, 1));
+    if (chb)
+        chb->setChecked(cpu->flags() & CPUNameSpace::ZeroFlag);
+
+    chb = (QCheckBox *)(ui->tw_flag->cellWidget(2, 1));
+    if (chb)
+        chb->setChecked(cpu->flags() & CPUNameSpace::CarryFlag);
 }
 
 void MainWindow::on_registerUpdated(unsigned int reg, unsigned int val) {

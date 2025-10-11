@@ -2,6 +2,8 @@
 
 #include "../cpu/cpu.h"
 
+#include <QDebug>
+
 void AddInstruction::execute(unsigned int operand1, unsigned int operand2, unsigned int literal, unsigned int modificator) {
   unsigned int source = getSourceValue(operand2, literal, modificator);
   unsigned int destin = getDestinationValue(operand1, operand2, literal, modificator);
@@ -46,13 +48,20 @@ void CmpInstruction::execute(unsigned int operand1, unsigned int operand2, unsig
   unsigned int source = getSourceValue(operand2, literal, modificator);
   unsigned int destin = getDestinationValue(operand1, operand2, literal, modificator);
 
+  qDebug() << "------------------------";
+  qDebug() << destin << " - CMP with - " << source;
+  qDebug() << "------------------------";
+
   if (destin == source) {
-    cpu->setFlags(cpu->flags() & CPUNameSpace::ZeroFlag);
+    qDebug() << "destin == source";
+    cpu->setFlags(cpu->flags() | CPUNameSpace::ZeroFlag);
   }
   else if (destin > source) {
+    qDebug() << "destin > source";
     cpu->setFlags(cpu->flags() & !CPUNameSpace::SignFlag);
   }
   else if (destin < source) {
-    cpu->setFlags(cpu->flags() & CPUNameSpace::SignFlag);
+    qDebug() << "destin < source";
+    cpu->setFlags(cpu->flags() | CPUNameSpace::SignFlag);
   }
 }

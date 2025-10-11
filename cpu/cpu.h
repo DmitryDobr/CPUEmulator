@@ -52,6 +52,8 @@ public:
 
   void setRegister(unsigned int reg, unsigned int val);
 
+  Memory * memory() const {return CPUMemory;}
+
 signals:
   void updateCPU(unsigned int pCounter);
 

@@ -42,8 +42,6 @@ void CPU::setRegister(unsigned int reg, unsigned int val) {
 
 void CPU::update() {
 
-  emit updateCPU(pc);
-
   qDebug() << "==========================================================================================";
   qDebug() << cycleCounter << " >>>>>>";
 
@@ -51,10 +49,10 @@ void CPU::update() {
   qDebug() << "Memory cell no. " << pc << " value = " << operation;
 
   /////////////////////////////////////////////////////////////////////////////////////////////////////////
-  unsigned int command  = (operation >> CPUNameSpace::COMMAND_OFFSET);
-  unsigned int operand1 = (operation >> CPUNameSpace::OPERAND1_OFFSET) & CPUNameSpace::OPERAND_MASK;
-  unsigned int operand2 = (operation >> CPUNameSpace::OPERAND2_OFFSET) & CPUNameSpace::OPERAND_MASK;
-  unsigned int literal  = (operation >> CPUNameSpace::LITERAL_OFFSET)  & CPUNameSpace::LITERAL_MASK;
+  unsigned int command     = (operation >> CPUNameSpace::COMMAND_OFFSET);
+  unsigned int operand1    = (operation >> CPUNameSpace::OPERAND1_OFFSET) & CPUNameSpace::OPERAND_MASK;
+  unsigned int operand2    = (operation >> CPUNameSpace::OPERAND2_OFFSET) & CPUNameSpace::OPERAND_MASK;
+  unsigned int literal     = (operation >> CPUNameSpace::LITERAL_OFFSET)  & CPUNameSpace::LITERAL_MASK;
   unsigned int modificator = operation & CPUNameSpace::MODIFICATOR_MASK;
 
   qDebug() << "command no." << command;
@@ -65,17 +63,16 @@ void CPU::update() {
     inst->execute(operand1,operand2,literal,modificator);
 
 
+  emit updateCPU(pc);
+
   if (pc+1 >= CPUNameSpace::MEMORY_SIZE) {
     qDebug() << "STOP";
     mTimer->stop();
-    QTimer::singleShot(1000, this, [this]() {
-      emit updateCPU(pc);
-    });
   }
   else
     pc++;
 
 
-
   cycleCounter++;
+
 }
