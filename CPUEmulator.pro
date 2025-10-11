@@ -17,12 +17,14 @@ SOURCES += main.cpp\
     cpu/cpu.cpp \
     instruction/instruction.cpp \
     instruction/instructionset.cpp \
-    memory/memory.cpp
+    memory/memory.cpp \
+    instruction/arithmetic.cpp
 
 HEADERS  += mainwindow.h \
     cpu/cpu.h \
     instruction/instruction.h \
     instruction/instructionset.h \
-    memory/memory.h
+    memory/memory.h \
+    instruction/arithmetic.h
 
 FORMS    += mainwindow.ui
