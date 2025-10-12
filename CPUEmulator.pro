@@ -19,7 +19,8 @@ SOURCES += main.cpp\
     instruction/instructionset.cpp \
     memory/memory.cpp \
     instruction/arithmetic.cpp \
-    instruction/boolean.cpp
+    instruction/boolean.cpp \
+    instruction/transition.cpp
 
 HEADERS  += mainwindow.h \
     cpu/cpu.h \
@@ -27,6 +28,7 @@ HEADERS  += mainwindow.h \
     instruction/instructionset.h \
     memory/memory.h \
     instruction/arithmetic.h \
-    instruction/boolean.h
+    instruction/boolean.h \
+    instruction/transition.h
 
 FORMS    += mainwindow.ui
