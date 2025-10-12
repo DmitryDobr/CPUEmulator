@@ -1,7 +1,7 @@
 #include "memory.h"
 
 Memory::Memory(QObject *parent) : QObject(parent) {
-    for (int i = 0 ; i < 63; i++)
+    for (int i = 0 ; i < 64; i++)
         mem[i] = 0;
                           // 00000 000000 000000 00000000000 0000
     mem[0]  = 0x70000021; // 01110 000000 000000 00000000010 0001 - MOV REG0, 2

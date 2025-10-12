@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>913</width>
+    <width>1039</width>
     <height>630</height>
    </rect>
   </property>
@@ -45,7 +45,7 @@
      <rect>
       <x>510</x>
       <y>50</y>
-      <width>391</width>
+      <width>524</width>
       <height>515</height>
      </rect>
     </property>
@@ -62,16 +62,11 @@
      <enum>QAbstractItemView::ScrollPerPixel</enum>
     </property>
     <attribute name="horizontalHeaderDefaultSectionSize">
-     <number>275</number>
+     <number>125</number>
     </attribute>
     <attribute name="verticalHeaderDefaultSectionSize">
      <number>30</number>
     </attribute>
-    <column>
-     <property name="text">
-      <string>Memory</string>
-     </property>
-    </column>
    </widget>
    <widget class="QLabel" name="la_pc">
     <property name="geometry">
@@ -119,12 +114,21 @@
      <rect>
       <x>220</x>
       <y>10</y>
-      <width>211</width>
+      <width>281</width>
       <height>21</height>
      </rect>
     </property>
+    <property name="font">
+     <font>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
     <property name="text">
      <string>CPU Emulator</string>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
     </property>
    </widget>
    <widget class="QTableWidget" name="tw_flag">
@@ -213,7 +217,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>913</width>
+     <width>1039</width>
      <height>26</height>
     </rect>
    </property>

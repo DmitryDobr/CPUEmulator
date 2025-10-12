@@ -61,7 +61,7 @@ void CmpInstruction::execute(unsigned int operand1, unsigned int operand2, unsig
     cpu->setFlags(cpu->flags() & 0xD); // опускаем флаг нуля
   }
 
-  if (destin >= source) {
+  if (destin > source) {
     qDebug() << "destin > source";
     cpu->setFlags(cpu->flags() & 0xE); // опускаем флаг знака
   }
