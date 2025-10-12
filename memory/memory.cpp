@@ -23,7 +23,7 @@ unsigned int Memory::read(unsigned int addr) const {
   if (addr < 64)
     return mem[addr];
   else
-      throw "Memory cell not found";
+      return 0;
 }
 
 void Memory::write(unsigned int addr, unsigned int val) {
@@ -31,6 +31,4 @@ void Memory::write(unsigned int addr, unsigned int val) {
     mem[addr] = val;
     emit cellUpdated(addr, val);
   }
-  else
-    throw "Memory cell not found";
 }

@@ -12,7 +12,7 @@ MainWindow::MainWindow(QWidget *parent) :
     cpu = new CPU(this); // инициализация процессора
     unsigned int * val = (unsigned int *)cpu->memory()->dataPtr(); // при инициализации в память уже что-то внесено (пока так)
 
-    // настройка интерфейса
+    // таблица ячеек памяти
     ui->tw_mem->setRowCount(16);
     ui->tw_mem->setColumnCount(CPUNameSpace::MEMORY_SIZE/16);
 
@@ -56,15 +56,21 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tw_mem->setVerticalHeaderLabels(rowLabels);
     ui->tw_mem->setCurrentCell(0,0);
 
+    // таблица регистров
+    rowLabels.clear();
     ui->tw_reg->setRowCount(16);
     for (int i = 0; i < 16; i++) {
+        rowLabels.append(QString("REG%1").arg(i));
+
         QTableWidgetItem * ti = new QTableWidgetItem;
         ti->setText(QString("%1").arg(0, 8, 16, QChar('0')));
         ti->setFlags(ti->flags() & 0xfffffffd);
         ti->setTextAlignment(Qt::AlignCenter);
         ui->tw_reg->setItem(i,0,ti);
     }
+    ui->tw_reg->setVerticalHeaderLabels(rowLabels);
 
+    // таблица флагов
     for (int i = 0; i < ui->tw_flag->rowCount(); i++) {
         QCheckBox * chb = new QCheckBox(this);
         chb->setStyleSheet("padding-left: 50%;");
@@ -98,6 +104,11 @@ void MainWindow::on_updatedCPU(unsigned int pCounter) {
     int column = pCounter / 16;
     int row = pCounter % 16;
     ui->tw_mem->setCurrentCell(row,column);
+
+    if (pCounter == 63) {
+        ui->pushButton_pause->setEnabled(false);
+        ui->pushButton_play->setEnabled(false);
+    }
 
     // обновляем флаги в интерфейсе
     QCheckBox * chb;

@@ -28,7 +28,7 @@ unsigned int CPU::getRegister(unsigned int reg) const {
   if (reg < 16)
     return registers[reg];
   else
-    throw "register not found";
+    return 0;
 }
 
 void CPU::setRegister(unsigned int reg, unsigned int val) {
@@ -36,8 +36,6 @@ void CPU::setRegister(unsigned int reg, unsigned int val) {
     registers[reg] = val;
     emit registerUpdated(reg, val);
   }
-  else
-      throw "register not found";
 }
 
 void CPU::setPlaying(bool flag) {
