@@ -54,19 +54,14 @@ void CmpInstruction::execute(unsigned int operand1, unsigned int operand2, unsig
 
   if (destin == source) {
     qDebug() << "destin == source";
-    cpu->setFlags(cpu->flags() | CPUNameSpace::ZeroFlag); // поднимаем флаг нуля
+    cpu->setFlags(cpu->flags() | CPUNameSpace::ZeroFlag);
   }
-  else {
-    qDebug() << "destin != source";
-    cpu->setFlags(cpu->flags() & 0xD); // опускаем флаг нуля
-  }
-
-  if (destin >= source) {
+  else if (destin > source) {
     qDebug() << "destin > source";
-    cpu->setFlags(cpu->flags() & 0xE); // опускаем флаг знака
+    cpu->setFlags(cpu->flags() & !CPUNameSpace::SignFlag);
   }
-  else {
+  else if (destin < source) {
     qDebug() << "destin < source";
-    cpu->setFlags(cpu->flags() | CPUNameSpace::SignFlag); // поднимаем флаг знака
+    cpu->setFlags(cpu->flags() | CPUNameSpace::SignFlag);
   }
 }

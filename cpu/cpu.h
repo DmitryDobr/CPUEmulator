@@ -46,10 +46,7 @@ public:
 
   unsigned int programCounter() const { return pc; }
 
-  void setProgramCounter(unsigned int c) {
-    if (c < 64)
-      pc = c;
-  }
+  void setProgramCounter(unsigned int c) { pc = c; }
 
   unsigned int getRegister(unsigned int reg) const;
 
