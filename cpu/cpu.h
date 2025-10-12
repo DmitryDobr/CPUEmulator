@@ -57,6 +57,8 @@ public:
 
   Memory * memory() const {return CPUMemory;}
 
+  void setPlaying(bool flag);
+
 signals:
   void updateCPU(unsigned int pCounter);
 

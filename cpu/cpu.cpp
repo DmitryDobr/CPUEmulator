@@ -37,7 +37,14 @@ void CPU::setRegister(unsigned int reg, unsigned int val) {
     emit registerUpdated(reg, val);
   }
   else
-    throw "register not found";
+      throw "register not found";
+}
+
+void CPU::setPlaying(bool flag) {
+    if (flag)
+        mTimer->start();
+    else
+        mTimer->stop();
 }
 
 void CPU::update() {

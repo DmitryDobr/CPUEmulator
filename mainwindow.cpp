@@ -30,20 +30,12 @@ MainWindow::MainWindow(QWidget *parent) :
         ti->setFlags(ti->flags() & 0xfffffffd);
         ti->setTextAlignment(Qt::AlignCenter);
 
-
-        unsigned int command     = (*val >> CPUNameSpace::COMMAND_OFFSET);
-        unsigned int operand1    = (*val >> CPUNameSpace::OPERAND1_OFFSET) & CPUNameSpace::OPERAND_MASK;
-        unsigned int operand2    = (*val >> CPUNameSpace::OPERAND2_OFFSET) & CPUNameSpace::OPERAND_MASK;
-        unsigned int literal     = (*val >> CPUNameSpace::LITERAL_OFFSET)  & CPUNameSpace::LITERAL_MASK;
-        unsigned int modificator = *val & CPUNameSpace::MODIFICATOR_MASK;
-
         if (*val > 0x8000000)
-            ti->setToolTip("код команды : " + QString::number(command) + "\n" +
-                           "операнд 1   : " + QString::number(operand1) + "\n" +
-                           "операнд 2   : " + QString::number(operand2) + "\n" +
-                           "литерал     : " + QString::number(literal) + "\n" +
-                           "модификатор : " + QString::number(modificator)
-                           );
+            ti->setToolTip("код команды  : " + QString::number((*val >> CPUNameSpace::COMMAND_OFFSET)) + "\n" +
+                           "операнд 1       : " + QString::number(((*val >> CPUNameSpace::OPERAND1_OFFSET) & CPUNameSpace::OPERAND_MASK)) + "\n" +
+                           "операнд 2       : " + QString::number(((*val >> CPUNameSpace::OPERAND2_OFFSET) & CPUNameSpace::OPERAND_MASK)) + "\n" +
+                           "литерал           : " + QString::number(((*val >> CPUNameSpace::LITERAL_OFFSET)  & CPUNameSpace::LITERAL_MASK)) + "\n" +
+                           "мод~oр           : " + QString::number((*val & CPUNameSpace::MODIFICATOR_MASK)) );
 
         ui->tw_mem->setItem(row,column,ti);
 
@@ -62,8 +54,7 @@ MainWindow::MainWindow(QWidget *parent) :
     }
     ui->tw_mem->setHorizontalHeaderLabels(columnLabels);
     ui->tw_mem->setVerticalHeaderLabels(rowLabels);
-
-
+    ui->tw_mem->setCurrentCell(0,0);
 
     ui->tw_reg->setRowCount(16);
     for (int i = 0; i < 16; i++) {
@@ -81,8 +72,17 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->tw_flag->setCellWidget(i,1,chb);
     }
 
-    ui->tw_mem->setCurrentCell(0,0);
+    // добавление иконок на кнопки
+    QIcon ButtonIcon;
+    ButtonIcon = QApplication::style()->standardIcon(QStyle::SP_MediaPlay);
+    ui->pushButton_play->setIcon(ButtonIcon);
+    ui->pushButton_play->setIconSize(QSize(40,40));
 
+    ButtonIcon = QApplication::style()->standardIcon(QStyle::SP_MediaPause);
+    ui->pushButton_pause->setIcon(ButtonIcon);
+    ui->pushButton_pause->setIconSize(QSize(40,40));
+
+    // соединения сигналов процессора с обработчиками
     connect(cpu, SIGNAL(updateCPU(unsigned int)), this, SLOT(on_updatedCPU(unsigned int)));
     connect(cpu, SIGNAL(registerUpdated(unsigned int, unsigned int)), this, SLOT(on_registerUpdated(unsigned int, unsigned int)));
     connect(cpu, SIGNAL(memoryCellUpdated(unsigned int, unsigned int)), this, SLOT(on_memoryCellUpdated(unsigned int, unsigned int)));
@@ -122,4 +122,16 @@ void MainWindow::on_memoryCellUpdated(unsigned int addr, unsigned int val) {
     int column = addr / 16;
     int row = addr % 16;
     ui->tw_mem->item(row,column)->setText(QString::number(val));
+}
+
+void MainWindow::on_pushButton_play_clicked() {
+    cpu->setPlaying(true);
+    ui->pushButton_pause->setEnabled(true);
+    ui->pushButton_play->setEnabled(false);
+}
+
+void MainWindow::on_pushButton_pause_clicked() {
+    cpu->setPlaying(false);
+    ui->pushButton_pause->setEnabled(false);
+    ui->pushButton_play->setEnabled(true);
 }
