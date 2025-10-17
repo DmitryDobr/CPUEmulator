@@ -42,7 +42,7 @@ MainWindow::MainWindow(QWidget *parent) :
         val = val + 1;
 
         if (row == 15) {
-            QString columnLab = QString("0x%1").arg(i, 3, 16, QChar('0'));
+            QString columnLab = QString("0x%1").arg(i, 2, 16, QChar('0'));
             columnLab.chop(1);
             columnLabels.append(columnLab);
 
@@ -60,7 +60,7 @@ MainWindow::MainWindow(QWidget *parent) :
     rowLabels.clear();
     ui->tw_reg->setRowCount(16);
     for (int i = 0; i < 16; i++) {
-        rowLabels.append(QString("REG%1").arg(i));
+        rowLabels.append(QString("REG%1(%2)").arg(i).arg(char(65+i)));
 
         QTableWidgetItem * ti = new QTableWidgetItem;
         ti->setText(QString("%1").arg(0, 8, 16, QChar('0')));

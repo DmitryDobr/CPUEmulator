@@ -1,5 +1,7 @@
 #include "memory.h"
 
+#include <QDebug>
+
 Memory::Memory(QObject *parent) : QObject(parent) {
     for (int i = 0 ; i < 64; i++)
         mem[i] = 0;

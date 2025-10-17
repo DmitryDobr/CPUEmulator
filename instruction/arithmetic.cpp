@@ -48,25 +48,13 @@ void CmpInstruction::execute(unsigned int operand1, unsigned int operand2, unsig
   unsigned int source = getSourceValue(operand2, literal, modificator);
   unsigned int destin = getDestinationValue(operand1, operand2, literal, modificator);
 
-  qDebug() << "------------------------";
-  qDebug() << destin << " - CMP with - " << source;
-  qDebug() << "------------------------";
-
-  if (destin == source) {
-    qDebug() << "destin == source";
+  if (destin == source)
     cpu->setFlags(cpu->flags() | CPUNameSpace::ZeroFlag); // поднимаем флаг нуля
-  }
-  else {
-    qDebug() << "destin != source";
+  else
     cpu->setFlags(cpu->flags() & 0xD); // опускаем флаг нуля
-  }
 
-  if (destin > source) {
-    qDebug() << "destin > source";
+  if (destin >= source)
     cpu->setFlags(cpu->flags() & 0xE); // опускаем флаг знака
-  }
-  else {
-    qDebug() << "destin < source";
+  else
     cpu->setFlags(cpu->flags() | CPUNameSpace::SignFlag); // поднимаем флаг знака
-  }
 }
