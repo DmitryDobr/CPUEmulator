@@ -30,12 +30,22 @@ MainWindow::MainWindow(QWidget *parent) :
         ti->setFlags(ti->flags() & 0xfffffffd);
         ti->setTextAlignment(Qt::AlignCenter);
 
-        if (*val > 0x8000000)
+        if (*val > 0x8000000) {
+
+            unsigned int literal = (*val >> CPUNameSpace::LITERAL_OFFSET)  & CPUNameSpace::LITERAL_MASK;
+            int litVal = 0;
+            if (literal & 1024)
+                litVal = -(literal & 1023);
+            else
+                litVal = literal & 1023;
+
+
             ti->setToolTip("код команды  : " + QString::number((*val >> CPUNameSpace::COMMAND_OFFSET)) + "\n" +
                            "операнд 1       : " + QString::number(((*val >> CPUNameSpace::OPERAND1_OFFSET) & CPUNameSpace::OPERAND_MASK)) + "\n" +
                            "операнд 2       : " + QString::number(((*val >> CPUNameSpace::OPERAND2_OFFSET) & CPUNameSpace::OPERAND_MASK)) + "\n" +
-                           "литерал           : " + QString::number(((*val >> CPUNameSpace::LITERAL_OFFSET)  & CPUNameSpace::LITERAL_MASK)) + "\n" +
+                           "литерал           : " + QString::number(litVal) + "\n" +
                            "мод~oр           : " + QString::number((*val & CPUNameSpace::MODIFICATOR_MASK)) );
+        }
 
         ui->tw_mem->setItem(row,column,ti);
 
@@ -126,13 +136,13 @@ void MainWindow::on_updatedCPU(unsigned int pCounter) {
 }
 
 void MainWindow::on_registerUpdated(unsigned int reg, unsigned int val) {
-    ui->tw_reg->item(reg,0)->setText(QString::number(val));
+    ui->tw_reg->item(reg,0)->setText(QString::number((int)val));
 }
 
 void MainWindow::on_memoryCellUpdated(unsigned int addr, unsigned int val) {
     int column = addr / 16;
     int row = addr % 16;
-    ui->tw_mem->item(row,column)->setText(QString::number(val));
+    ui->tw_mem->item(row,column)->setText(QString::number((int)val));
 }
 
 void MainWindow::on_pushButton_play_clicked() {
