@@ -54,6 +54,8 @@ public:
 
   Memory * memory() const {return CPUMemory;}
 
+  void setPlaying(bool flag);
+
 signals:
   void updateCPU(unsigned int pCounter);
 
@@ -78,7 +80,6 @@ private:
   QTimer * mTimer; // таймер, по срабатыванию сигнала timeout() процессор будет
   // считывать команды из памяти и выполнять их
   // команды считываются на основе счетчика команд и выполняются в соответствии с набором инструкций
-  int cycleCounter; // счетчик количества исполненных "тактов"
 };
 
 #endif // CPU_H

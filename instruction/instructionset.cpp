@@ -46,7 +46,7 @@ void HltInstruction::execute(unsigned int operand1, unsigned int operand2, unsig
 }
 
 void MovInstruction::execute(unsigned int operand1, unsigned int operand2, unsigned int literal, unsigned int modificator) {
-  unsigned int source = getSourceValue(operand2, literal, modificator);
+  int source = getSourceValue(operand2, literal, modificator);
 
   setDestinationValue(operand1, operand2, literal, modificator, source);
 }

@@ -24,6 +24,10 @@ private slots:
 
     void on_memoryCellUpdated(unsigned int addr, unsigned int val);
 
+    void on_pushButton_play_clicked();
+
+    void on_pushButton_pause_clicked();
+
 private:
   Ui::MainWindow *ui;
 

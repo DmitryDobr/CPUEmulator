@@ -23,11 +23,11 @@ public:
 
 protected:
 
-    unsigned int getSourceValue(unsigned int operand2, unsigned int literal, unsigned int modificator); // по значению модификатора получает значение из источника
+    int getSourceValue(unsigned int operand2, unsigned int literal, unsigned int modificator); // по значению модификатора получает значение из источника
 
-    unsigned int getDestinationValue(unsigned int operand1, unsigned int operand2, unsigned int literal, unsigned int modificator); // по значению модификатора получает значение из цели
+    int getDestinationValue(unsigned int operand1, unsigned int operand2, unsigned int literal, unsigned int modificator); // по значению модификатора получает значение из цели
 
-    void setDestinationValue(unsigned int operand1, unsigned int operand2, unsigned int literal, unsigned int modificator, unsigned int value); // по значению модификатора определяет куда нужно записать и делает запись значения
+    void setDestinationValue(unsigned int operand1, unsigned int operand2, unsigned int literal, unsigned int modificator, int value); // по значению модификатора определяет куда нужно записать и делает запись значения
 
     CPU * cpu;
     Memory * memory;
