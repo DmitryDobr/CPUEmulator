@@ -4,6 +4,7 @@
 #include <QMainWindow>
 
 #include "cpu/cpu.h"
+#include "translator/asmtranslator.h"
 
 namespace Ui {
 class MainWindow;
@@ -28,10 +29,17 @@ private slots:
 
     void on_pushButton_pause_clicked();
 
+    void on_pushButton_filePick_clicked();
+
+    void on_pushButton_execAsm_clicked();
+
+    void on_pushButton_editAsm_clicked();
+
 private:
   Ui::MainWindow *ui;
 
   CPU * cpu;
+  AsmTranslator translator;
 };
 
 #endif // MAINWINDOW_H

@@ -20,7 +20,8 @@ SOURCES += main.cpp\
     memory/memory.cpp \
     instruction/arithmetic.cpp \
     instruction/boolean.cpp \
-    instruction/transition.cpp
+    instruction/transition.cpp \
+    translator/asmtranslator.cpp
 
 HEADERS  += mainwindow.h \
     cpu/cpu.h \
@@ -29,6 +30,7 @@ HEADERS  += mainwindow.h \
     memory/memory.h \
     instruction/arithmetic.h \
     instruction/boolean.h \
-    instruction/transition.h
+    instruction/transition.h \
+    translator/asmtranslator.h
 
 FORMS    += mainwindow.ui

@@ -4,6 +4,10 @@
 #include <QDebug>
 #include <QCheckBox>
 
+#include <QFileDialog>
+#include <QDesktopServices>
+#include <QUrl>
+
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
     ui(new Ui::MainWindow) {
@@ -145,14 +149,42 @@ void MainWindow::on_memoryCellUpdated(unsigned int addr, unsigned int val) {
     ui->tw_mem->item(row,column)->setText(QString::number((int)val));
 }
 
+// возобновить выполнение процессора
 void MainWindow::on_pushButton_play_clicked() {
     cpu->setPlaying(true);
     ui->pushButton_pause->setEnabled(true);
     ui->pushButton_play->setEnabled(false);
 }
 
+// пауза выполнения процессора
 void MainWindow::on_pushButton_pause_clicked() {
     cpu->setPlaying(false);
     ui->pushButton_pause->setEnabled(false);
     ui->pushButton_play->setEnabled(true);
+}
+
+// выбор файла
+void MainWindow::on_pushButton_filePick_clicked() {
+    QString filePath = QFileDialog::getOpenFileName(this, "Выберите файл");
+    ui->lineEdit_asmFile->setText(filePath);
+}
+
+// транслировать ассемблер код в память процессора
+void MainWindow::on_pushButton_execAsm_clicked() {
+    QString filePath = ui->lineEdit_asmFile->text();
+    QFile file(filePath);
+    QString content;
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QTextStream stream(&file);
+        content = stream.readAll();
+        file.close();
+    }
+
+    translator.translate(content, cpu->memory());
+}
+
+void MainWindow::on_pushButton_editAsm_clicked() {
+    QString filePath = ui->lineEdit_asmFile->text();
+    if (!filePath.isEmpty())
+        QDesktopServices::openUrl(QUrl::fromLocalFile(filePath));
 }
