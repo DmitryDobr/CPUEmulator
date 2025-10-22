@@ -16,7 +16,7 @@ public:
     void translate(QString text, Memory * mem);
 
 private:
-    QMap<QString, int> instructionCodes;
+    QMap<QString, unsigned int> instructionCodes;
 
 };
 
