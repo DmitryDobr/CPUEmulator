@@ -33,8 +33,6 @@ AsmTranslator::AsmTranslator() {
 void AsmTranslator::translate(QString text, Memory * mem) {
     (void)mem;
 
-    QRegularExpression memExpression("\\[.*\\]"); // выражение для поиска в строке символов памяти
-
     QMap<QString, int> sectionAddrs; // по наименованию section: запоминаем адрес памяти в котором находится первая операция
     QMap<QString, int> dataAddrs;    // по наименованию переменной объявленной в data. запоминаем адрес памяти, с которого начинается
 
@@ -43,7 +41,6 @@ void AsmTranslator::translate(QString text, Memory * mem) {
         unsigned int instructionCode = 0, destination = 0, source = 0, literal = 0, modificator = 0;
 
         QString comandString, destinString, sourceString;
-
 
         qDebug() << lst[i];
         QStringList CmdDestSource = lst[i].split(','); // [0] - код команды + destination ; [1] - source
@@ -62,32 +59,78 @@ void AsmTranslator::translate(QString text, Memory * mem) {
         qDebug() << "source string = " << sourceString;
         qDebug() << "-------------------------------------------------";
 
-        if (destinString.contains("REG") && !memExpression.match(destinString).hasMatch()) {
-            qDebug() << "- destination это регистр";
-            destination = destinString.remove("REG").toUInt();
+        if (!destinString.isEmpty()) {
+            qDebug() << "анализ токена destination: ";
+            QVector <unsigned int> destToken = analyseToken(destinString);
+            qDebug() << destToken;
         }
-        else if (destinString.contains("REG") && memExpression.match(destinString).hasMatch()) {
-            qDebug() << "- destination это память из регистра (возможно со смещением)";
+
+        if (!sourceString.isEmpty()) {
+            qDebug() << "анализ токена source: ";
+            QVector <unsigned int> sourToken = analyseToken(sourceString);
+            qDebug() << sourToken;
+        }
 
 
-//            destination = destinString.remove("[").remove("]").toUInt();
-        }
-        else if (!destinString.contains("REG") && memExpression.match(destinString).hasMatch()) {
-            qDebug() << "- destination это память";
-            destination = destinString.remove("[").remove("]").toUInt();
+//        qDebug() << "instruc.code = " << instructionCode;
+//        qDebug() << "destination  = " << destination;
+//        qDebug() << "source       = " << source;
+//        qDebug() << "literal      = " << literal;
+//        qDebug() << "modificator  = " << modificator;
+        qDebug() << "=================================================";
+        qDebug() << "=================================================";
+    }
+}
+
+// для анализа чем является destination и source. В начале вернет числовой код чем является,
+// потом - непосредственные значения, которые вгоняются в память
+QVector<unsigned int> AsmTranslator::analyseToken(QString token) {
+
+    QVector<unsigned int> result;
+    QRegularExpression memExpression("\\[.*\\]"); // выражение для поиска в строке символов памяти
+
+    if (token.contains("REG") && !memExpression.match(token).hasMatch()) {
+        qDebug() << "--> это регистр";
+        result.append(asmTypes::reg);
+        result.append(token.remove("REG").toUInt());
+    }
+    else if (token.contains("REG") && memExpression.match(token).hasMatch()) {
+        qDebug() << "--> это память из регистра (возможно со смещением)";
+
+        QStringList buf = token.remove("[").remove("]").split('+');
+        unsigned int memreg = buf[0].remove("REG").toUInt(); // номер регистра в котором адрес ячейки памяти
+
+        // если есть смещение
+        if (buf.length() > 1) {
+            if (buf[1].contains("REG")) {
+                qDebug() << "--> это память из регистра с смещением из регистра";
+                result.append(asmTypes::memRegOffsetReg);
+                result.append(memreg);
+                result.append(buf[1].remove("REG").toUInt()); // смещение записано в регистре
+            }
+            else {
+                qDebug() << "--> это память из регистра с фиксированным смещением";
+                result.append(asmTypes::memRegOffsetNum);
+                result.append(memreg);
+                result.append(buf[1].toUInt()); // фиксированное смещение
+            }
         }
         else {
-            qDebug() << "- destination отсутствует";
+            qDebug() << "--> это память из регистра без смещения";
+            result.append(asmTypes::memReg); // значение адрес памяти в регистре
+            result.append(memreg);
         }
-
-
-        qDebug() << "instruc.code = " << instructionCode;
-        qDebug() << "destination  = " << destination;
-        qDebug() << "source       = " << source;
-        qDebug() << "literal      = " << literal;
-        qDebug() << "modificator  = " << modificator;
-        qDebug() << "=================================================";
-
-
     }
+    else if (!token.contains("REG") && memExpression.match(token).hasMatch()) {
+        qDebug() << "--> это ячейка памяти";
+        result.append(asmTypes::memCell);
+        result.append(token.remove("[").remove("]").toUInt());
+    }
+    else {
+        qDebug() << "--> это числовое значение";
+        result.append(asmTypes::number);
+        result.append(token.toUInt());
+    }
+
+    return result;
 }
