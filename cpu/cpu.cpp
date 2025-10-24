@@ -58,10 +58,11 @@ void CPU::update() {
   if (inst)
     inst->execute(operand1,operand2,literal,modificator);
 
-  emit updateCPU(pc);
 
   if (pc+1 >= CPUNameSpace::MEMORY_SIZE)
     mTimer->stop();
   else
     pc++;
+
+  emit updateCPU(pc);
 }
