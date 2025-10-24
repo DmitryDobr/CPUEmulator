@@ -38,7 +38,7 @@ void AsmTranslator::translate(QString text, Memory * mem) {
 
     QStringList lst = text.split("\n");
     for (int i = 0; i < lst.length(); i++) {
-        unsigned int instructionCode = 0, destination = 0, source = 0, literal = 0, modificator = 0;
+        unsigned int instructionCode = 0, operand1 = 0, operand2 = 0, literal = 0, modificator = 0;
 
         QString comandString, destinString, sourceString;
 
@@ -74,13 +74,47 @@ void AsmTranslator::translate(QString text, Memory * mem) {
 
         modificator = getModificator(destToken[0], sourToken[0]);
 
+        // сборка operand 1 operand 2 literal из destination source и модификатора
 
-//        qDebug() << "instruc.code = " << instructionCode;
-//        qDebug() << "destination  = " << destination;
-//        qDebug() << "source       = " << source;
-//        qDebug() << "literal      = " << literal;
-        qDebug() << "modificator  = " << QString("%1").arg(modificator, 4, 2, QChar('0'));
+        if (destToken[0] != asmTypes::empty && sourToken[0] != asmTypes::empty) {
+            if (modificator < 6) {
+                operand1 = destToken[1]; // операнд 1 всегда
+
+                if (modificator == 1)
+                    literal = sourToken[1];
+                else
+                    operand2 = sourToken[1];
+
+                if (modificator >= 4)
+                    literal = sourToken[2];
+            }
+
+            if (modificator >= 8 && modificator <= 11) {
+                operand2 = sourToken[1];
+
+                operand1 = destToken[1];
+                if (modificator >= 10)
+                    literal = destToken[2];
+            }
+
+            if (modificator >= 12 && modificator <= 15) {
+                literal = sourToken[1];
+
+                operand1 = destToken[1];
+                if (modificator >= 14)
+                    operand2 = destToken[2];
+            }
+        }
+
+        if (modificator == 7)
+            literal = destToken[1];
+
         qDebug() << "=================================================";
+        qDebug() << QString("%1").arg(instructionCode, 5, 2, QChar('0'))
+                 << QString("%1").arg(operand1, 6, 2, QChar('0'))
+                 << QString("%1").arg(operand2, 6, 2, QChar('0'))
+                 << QString("%1").arg(literal, 11, 2, QChar('0'))
+                 << QString("%1").arg(modificator, 4, 2, QChar('0'));
         qDebug() << "=================================================";
     }
 }
