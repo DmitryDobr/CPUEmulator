@@ -30,13 +30,13 @@ AsmTranslator::AsmTranslator() {
     };
 }
 
-void AsmTranslator::translate(QString text, Memory * mem) {
-    (void)mem;
+bool AsmTranslator::translate(QString text, Memory * mem) {
 
     QMap<QString, int> sectionAddrs; // по наименованию section: запоминаем адрес памяти в котором находится первая операция
     QMap<QString, int> dataAddrs;    // по наименованию переменной объявленной в data. запоминаем адрес памяти, с которого начинается
 
     QStringList lst = text.split("\n");
+    unsigned int cell = 0;
     for (int i = 0; i < lst.length(); i++) {
         unsigned int instructionCode = 0, operand1 = 0, operand2 = 0, literal = 0, modificator = 0;
 
@@ -70,7 +70,7 @@ void AsmTranslator::translate(QString text, Memory * mem) {
         qDebug() << sourToken;
 
         if (destToken[0] == asmTypes::readError || sourToken[0] == asmTypes::readError)
-            return;
+            return false;
 
         modificator = getModificator(destToken[0], sourToken[0]);
 
@@ -116,7 +116,25 @@ void AsmTranslator::translate(QString text, Memory * mem) {
                  << QString("%1").arg(literal, 11, 2, QChar('0'))
                  << QString("%1").arg(modificator, 4, 2, QChar('0'));
         qDebug() << "=================================================";
+
+        unsigned int code = instructionCode;
+        code = code << 6;
+        code = code | operand1;
+        code = code << 6;
+        code = code | operand2;
+        code = code << 11;
+        code = code | literal;
+        code = code << 4;
+        code = code | modificator;
+
+        qDebug() << QString("%1").arg(code,8,16,QChar('0'));
+        qDebug() << "=================================================";
+
+        mem->write(cell,code);
+        cell += 1;
     }
+
+    return true;
 }
 
 // для анализа чем является destination и source. В начале вернет числовой код чем является,

@@ -44,6 +44,15 @@ void CPU::setPlaying(bool flag) {
         mTimer->stop();
 }
 
+void CPU::resetCPU() {
+  CPUMemory->clear();
+  pc = 0; // ставим счетчик команд
+  for (int i = 0; i < 16; i++) // обнуляем регистры
+    registers[i] = 0;
+  cpuFlags = CPUNameSpace::NoFlag; // ставим нулевые флаги
+  emit updateCPU(pc);
+}
+
 void CPU::update() {
 
   unsigned int operation = CPUMemory->read(pc);

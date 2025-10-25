@@ -14,6 +14,8 @@ public:
 
   void write(unsigned int addr, unsigned int val);
 
+  void clear();
+
   void* dataPtr() const { return (void*)mem;}
 
 signals:

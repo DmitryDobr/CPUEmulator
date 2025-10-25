@@ -59,6 +59,8 @@ public:
 
   void setPlaying(bool flag);
 
+  void resetCPU();
+
 signals:
   void updateCPU(unsigned int pCounter);
 

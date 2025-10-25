@@ -13,7 +13,7 @@ class AsmTranslator
 public:
     AsmTranslator();
 
-    void translate(QString text, Memory * mem);
+    bool translate(QString text, Memory * mem);
 
 private:
     QVector <unsigned int> analyseToken(QString token);
