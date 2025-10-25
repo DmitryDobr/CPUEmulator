@@ -1,6 +1,7 @@
 #include "instructionset.h"
 
 #include "../cpu/cpu.h"
+#include <QDebug>
 
 InstructionSet::InstructionSet(CPU *cpu, Memory *mem) {
   instructions.insert(0x1F, new HltInstruction(cpu, mem)); // 31
@@ -56,6 +57,8 @@ void HltInstruction::execute(unsigned int operand1, unsigned int operand2, unsig
 
 void MovInstruction::execute(unsigned int operand1, unsigned int operand2, unsigned int literal, unsigned int modificator) {
   int source = getSourceValue(operand2, literal, modificator);
+
+  qDebug() << "MOV " << source;
 
   setDestinationValue(operand1, operand2, literal, modificator, source);
 }

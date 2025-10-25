@@ -32,12 +32,81 @@ AsmTranslator::AsmTranslator() {
 
 bool AsmTranslator::translate(QString text, Memory * mem) {
 
-    QMap<QString, int> sectionAddrs; // по наименованию section: запоминаем адрес памяти в котором находится первая операция
-    QMap<QString, int> dataAddrs;    // по наименованию переменной объявленной в data. запоминаем адрес памяти, с которого начинается
+    dataLabelsBuffer.clear();
 
     QStringList lst = text.split("\n");
-    unsigned int cell = CPUNameSpace::MEMORY_SIZE / 2;
+    unsigned int cell = 0;
+    int codestartline = 0;
+    bool codeSection = false; // проверка в какой секции кода мы находимся
+    // если в .data - записываем с начала памяти как данные
+    // если в .code - записываем с середины памяти как команды
+
+
+    // первый проход - запоминаем адресы, на которые указывают
+    // переменные в .data
+    // и метки в .text
+    // также очищаемся от комментариев
     for (int i = 0; i < lst.length(); i++) {
+        lst[i] = lst[i].split(';')[0]; // чтобы удалить комментарии
+        if (lst[i].isEmpty() || lst[i] == ".data")
+            continue;
+
+        if (codeSection) {
+            qDebug() << lst[i] << " " << cell;
+
+            if (lst[i].contains(":")) {
+                QString NameData = lst[i]; // [0] - имя данных [1] - сами данные
+
+                if (dataLabelsBuffer.contains(NameData.remove(':').trimmed())) // такой токен уже был в коде или неправильный asm-код
+                    return false;
+
+                dataLabelsBuffer.insert(NameData.trimmed(), cell); // запоминаем что токен указывает на текущую ячейку памяти,
+                // в которую будет перемещаться pc процессора при выполнении кода
+                cell -= 1;
+            }
+
+            if (!lst[i].isEmpty()) {
+                cell += 1;
+            }
+        }
+        else if (lst[i] == ".text") {
+            // с этого момента начинается секция с кодами команд
+            codeSection = true;
+            cell = CPUNameSpace::MEMORY_SIZE / 2;
+            codestartline = i;
+        }
+        else {
+            // записываем данные в память
+            QStringList NameData = lst[i].split(':'); // [0] - имя данных [1] - сами данные
+
+            if (dataLabelsBuffer.contains(NameData[0].trimmed()) || NameData.length() < 2) // такой токен уже был в коде или неправильный asm-код
+                return false;
+
+            dataLabelsBuffer.insert(NameData[0].trimmed(), cell); // запоминаем что токен указывает на текущую ячейку памяти,
+            // в которой находятся числовые данные
+
+            QStringList values = NameData[1].split(','); // если это последовательность чисел
+            // записываем все что есть в память
+            for (int j = 0; j < values.length(); j++) {
+                int number = values[j].toInt();
+                unsigned int val = (unsigned int)number;
+                mem->write(cell, val);
+                cell += 1;
+            }
+        }
+    }
+
+    qDebug() << dataLabelsBuffer;
+
+    cell = CPUNameSpace::MEMORY_SIZE / 2;
+    // второй проход по тексту - пишем команды в память
+    for (int i = codestartline+1; i < lst.length(); i++) {
+
+        if (lst[i].isEmpty() || lst[i].contains(':'))
+            continue;
+
+        // запоминаем метку памяти
+        // пишем код команды
         unsigned int instructionCode = 0, operand1 = 0, operand2 = 0, literal = 0, modificator = 0;
 
         QString comandString, destinString, sourceString;
@@ -53,6 +122,10 @@ bool AsmTranslator::translate(QString text, Memory * mem) {
         comandString = CmdDest[0];
         if (CmdDest.length() > 1)
             destinString = CmdDest[1];
+
+        comandString = comandString.trimmed();
+        destinString = destinString.trimmed();
+        sourceString = sourceString.trimmed();
 
         instructionCode = instructionCodes.value(comandString);
         qDebug() << "разбор команды :";
@@ -107,9 +180,13 @@ bool AsmTranslator::translate(QString text, Memory * mem) {
                     operand2 = destToken[2];
             }
         }
+        else if (destToken[0] != asmTypes::empty && sourToken[0] == asmTypes::empty) {
+            if (modificator == 7)
+                literal = destToken[1];
+            else
+                operand1 = destToken[1];
+        }
 
-        if (modificator == 7)
-            literal = destToken[1];
 
         qDebug() << "=================================================";
         qDebug() << QString("%1").arg(instructionCode, 5, 2, QChar('0'))
@@ -133,6 +210,8 @@ bool AsmTranslator::translate(QString text, Memory * mem) {
         qDebug() << "=================================================";
 
         mem->write(cell,code);
+
+
         cell += 1;
     }
 
@@ -185,8 +264,22 @@ QVector<unsigned int> AsmTranslator::analyseToken(QString token) {
     }
     else if (!token.contains("REG") && memExpression.match(token).hasMatch()) {
         qDebug() << "--> это ячейка памяти";
+        QString mem = token.remove("[").remove("]");
         result.append(asmTypes::memCell);
-        result.append(token.remove("[").remove("]").toUInt(&flag));
+
+        if (dataLabelsBuffer.contains(mem)) {
+            qDebug() << "--> это ячейка памяти взятая по токену";
+            result.append(dataLabelsBuffer.value(mem));
+        }
+        else {
+            qDebug() << "--> это ячейка памяти, взятая напрямую";
+            result.append(mem.toUInt(&flag));
+        }
+    }
+    else if (dataLabelsBuffer.contains(token)) {
+        qDebug() << "--> это номер ячейки памяти, полученный по токену переменной или секции (считаем как число)";
+        result.append(asmTypes::number);
+        result.append(dataLabelsBuffer.value(token));
     }
     else {
         qDebug() << "--> это числовое значение";

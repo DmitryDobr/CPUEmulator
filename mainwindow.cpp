@@ -172,13 +172,15 @@ void MainWindow::on_pushButton_execAsm_clicked() {
         int column = 0;
         int row = 0;
         for (int i = 0; i < CPUNameSpace::MEMORY_SIZE; i++) {
-            QTableWidgetItem * ti = new QTableWidgetItem;
+//            QTableWidgetItem * ti = new QTableWidgetItem;
 
-            ti->setText(QString("0x%1").arg(*val, 10, 16, QChar('0')));
-            ti->setFlags(ti->flags() & 0xfffffffd);
-            ti->setTextAlignment(Qt::AlignCenter);
+//            ti->setText(QString("0x%1").arg(*val, 10, 16, QChar('0')));
+//            ti->setFlags(ti->flags() & 0xfffffffd);
+//            ti->setTextAlignment(Qt::AlignCenter);
 
-            if (*val > 0x8000000) {
+            if (i >= CPUNameSpace::MEMORY_SIZE / 2) {
+
+                ui->tw_mem->item(row,column)->setText(QString("0x%1").arg(*val, 10, 16, QChar('0')));
 
                 unsigned int literal = (*val >> CPUNameSpace::LITERAL_OFFSET)  & CPUNameSpace::LITERAL_MASK;
                 int litVal = 0;
@@ -188,14 +190,16 @@ void MainWindow::on_pushButton_execAsm_clicked() {
                     litVal = literal & 1023;
 
 
-                ti->setToolTip("код команды  : " + QString::number((*val >> CPUNameSpace::COMMAND_OFFSET)) + "\n" +
+                ui->tw_mem->item(row,column)->setToolTip("код команды  : " + QString::number((*val >> CPUNameSpace::COMMAND_OFFSET)) + "\n" +
                                "операнд 1       : " + QString::number(((*val >> CPUNameSpace::OPERAND1_OFFSET) & CPUNameSpace::OPERAND_MASK)) + "\n" +
                                "операнд 2       : " + QString::number(((*val >> CPUNameSpace::OPERAND2_OFFSET) & CPUNameSpace::OPERAND_MASK)) + "\n" +
                                "литерал           : " + QString::number(litVal) + "\n" +
                                "мод~oр           : " + QString::number((*val & CPUNameSpace::MODIFICATOR_MASK)) );
             }
+            else {
+                 ui->tw_mem->item(row,column)->setText(QString::number((int)*val));
+            }
 
-            ui->tw_mem->setItem(row,column,ti);
 
             val = val + 1;
 
@@ -207,6 +211,9 @@ void MainWindow::on_pushButton_execAsm_clicked() {
                 row++;
         }
 
+    }
+    else {
+        qDebug() << "ошибка чтения";
     }
 
     // обнулить таблицу регистров
