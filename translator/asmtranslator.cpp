@@ -36,7 +36,7 @@ bool AsmTranslator::translate(QString text, Memory * mem) {
     QMap<QString, int> dataAddrs;    // по наименованию переменной объявленной в data. запоминаем адрес памяти, с которого начинается
 
     QStringList lst = text.split("\n");
-    unsigned int cell = 0;
+    unsigned int cell = CPUNameSpace::MEMORY_SIZE / 2;
     for (int i = 0; i < lst.length(); i++) {
         unsigned int instructionCode = 0, operand1 = 0, operand2 = 0, literal = 0, modificator = 0;
 
@@ -44,10 +44,12 @@ bool AsmTranslator::translate(QString text, Memory * mem) {
 
         qDebug() << lst[i];
         QStringList CmdDestSource = lst[i].split(','); // [0] - код команды + destination ; [1] - source
+        CmdDestSource.removeAll(""); // удалить пустые строки
         if (CmdDestSource.length() > 1)
             sourceString = CmdDestSource[1];
 
         QStringList CmdDest = CmdDestSource[0].split(' '); //  [0] - код команды ; [1] - destination
+        CmdDest.removeAll(""); // удалить пустые строки
         comandString = CmdDest[0];
         if (CmdDest.length() > 1)
             destinString = CmdDest[1];

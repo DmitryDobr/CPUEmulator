@@ -16,7 +16,7 @@ CPU::CPU(QObject *parent) : QObject(parent) {
   // создаем таймер для работы процессора
   mTimer = new QTimer(this);
   connect(mTimer, SIGNAL(timeout()), this, SLOT(update()));
-  mTimer->start(1000); // частота работы процессора - обновление 1 раз в секунду
+//  mTimer->start(1000); // частота работы процессора - обновление 1 раз в секунду
 }
 
 CPU::~CPU() {
@@ -39,14 +39,14 @@ void CPU::setRegister(unsigned int reg, unsigned int val) {
 
 void CPU::setPlaying(bool flag) {
     if (flag)
-        mTimer->start();
+        mTimer->start(1000);
     else
         mTimer->stop();
 }
 
 void CPU::resetCPU() {
   CPUMemory->clear();
-  pc = 0; // ставим счетчик команд
+  pc = CPUNameSpace::MEMORY_SIZE / 2; // ставим счетчик команд
   for (int i = 0; i < 16; i++) // обнуляем регистры
     registers[i] = 0;
   cpuFlags = CPUNameSpace::NoFlag; // ставим нулевые флаги

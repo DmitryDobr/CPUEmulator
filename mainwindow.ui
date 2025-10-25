@@ -142,8 +142,8 @@
      <rect>
       <x>260</x>
       <y>110</y>
-      <width>221</width>
-      <height>151</height>
+      <width>213</width>
+      <height>150</height>
      </rect>
     </property>
     <property name="focusPolicy">
@@ -218,6 +218,9 @@
     </item>
    </widget>
    <widget class="QPushButton" name="pushButton_pause">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
     <property name="geometry">
      <rect>
       <x>80</x>
