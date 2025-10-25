@@ -14,7 +14,6 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     cpu = new CPU(this); // инициализация процессора
-    unsigned int * val = (unsigned int *)cpu->memory()->dataPtr(); // при инициализации в память уже что-то внесено (пока так)
 
     // таблица ячеек памяти
     ui->tw_mem->setRowCount(16);
@@ -30,30 +29,11 @@ MainWindow::MainWindow(QWidget *parent) :
     for (int i = 0; i < CPUNameSpace::MEMORY_SIZE; i++) {
         QTableWidgetItem * ti = new QTableWidgetItem;
 
-        ti->setText(QString("%1").arg(*val, 10, 16, QChar('0')));
+        ti->setText(QString("0x%1").arg(0, 10, 16, QChar('0')));
         ti->setFlags(ti->flags() & 0xfffffffd);
         ti->setTextAlignment(Qt::AlignCenter);
 
-        if (*val > 0x8000000) {
-
-            unsigned int literal = (*val >> CPUNameSpace::LITERAL_OFFSET)  & CPUNameSpace::LITERAL_MASK;
-            int litVal = 0;
-            if (literal & 1024)
-                litVal = -(literal & 1023);
-            else
-                litVal = literal & 1023;
-
-
-            ti->setToolTip("код команды  : " + QString::number((*val >> CPUNameSpace::COMMAND_OFFSET)) + "\n" +
-                           "операнд 1       : " + QString::number(((*val >> CPUNameSpace::OPERAND1_OFFSET) & CPUNameSpace::OPERAND_MASK)) + "\n" +
-                           "операнд 2       : " + QString::number(((*val >> CPUNameSpace::OPERAND2_OFFSET) & CPUNameSpace::OPERAND_MASK)) + "\n" +
-                           "литерал           : " + QString::number(litVal) + "\n" +
-                           "мод~oр           : " + QString::number((*val & CPUNameSpace::MODIFICATOR_MASK)) );
-        }
-
         ui->tw_mem->setItem(row,column,ti);
-
-        val = val + 1;
 
         if (row == 15) {
             QString columnLab = QString("0x%1").arg(i, 2, 16, QChar('0'));
@@ -77,7 +57,7 @@ MainWindow::MainWindow(QWidget *parent) :
         rowLabels.append(QString("REG%1(%2)").arg(i).arg(char(65+i)));
 
         QTableWidgetItem * ti = new QTableWidgetItem;
-        ti->setText(QString("%1").arg(0, 8, 16, QChar('0')));
+        ti->setText("0");
         ti->setFlags(ti->flags() & 0xfffffffd);
         ti->setTextAlignment(Qt::AlignCenter);
         ui->tw_reg->setItem(i,0,ti);
@@ -171,6 +151,9 @@ void MainWindow::on_pushButton_filePick_clicked() {
 
 // транслировать ассемблер код в память процессора
 void MainWindow::on_pushButton_execAsm_clicked() {
+
+    on_pushButton_pause_clicked(); // останавливаем текущее выполнение
+
     QString filePath = ui->lineEdit_asmFile->text();
     QFile file(filePath);
     QString content;
@@ -180,7 +163,55 @@ void MainWindow::on_pushButton_execAsm_clicked() {
         file.close();
     }
 
-    translator.translate(content, cpu->memory());
+    cpu->resetCPU();
+    if (translator.translate(content, cpu->memory())) {
+
+        unsigned int * val = (unsigned int *)cpu->memory()->dataPtr(); // при инициализации в память уже что-то внесено (пока так)
+
+        // обновляем таблицу памяти в ui
+        int column = 0;
+        int row = 0;
+        for (int i = 0; i < CPUNameSpace::MEMORY_SIZE; i++) {
+            QTableWidgetItem * ti = new QTableWidgetItem;
+
+            ti->setText(QString("0x%1").arg(*val, 10, 16, QChar('0')));
+            ti->setFlags(ti->flags() & 0xfffffffd);
+            ti->setTextAlignment(Qt::AlignCenter);
+
+            if (*val > 0x8000000) {
+
+                unsigned int literal = (*val >> CPUNameSpace::LITERAL_OFFSET)  & CPUNameSpace::LITERAL_MASK;
+                int litVal = 0;
+                if (literal & 1024)
+                    litVal = -(literal & 1023);
+                else
+                    litVal = literal & 1023;
+
+
+                ti->setToolTip("код команды  : " + QString::number((*val >> CPUNameSpace::COMMAND_OFFSET)) + "\n" +
+                               "операнд 1       : " + QString::number(((*val >> CPUNameSpace::OPERAND1_OFFSET) & CPUNameSpace::OPERAND_MASK)) + "\n" +
+                               "операнд 2       : " + QString::number(((*val >> CPUNameSpace::OPERAND2_OFFSET) & CPUNameSpace::OPERAND_MASK)) + "\n" +
+                               "литерал           : " + QString::number(litVal) + "\n" +
+                               "мод~oр           : " + QString::number((*val & CPUNameSpace::MODIFICATOR_MASK)) );
+            }
+
+            ui->tw_mem->setItem(row,column,ti);
+
+            val = val + 1;
+
+            if (row == 15) {
+                row = 0;
+                column++;
+            }
+            else
+                row++;
+        }
+
+    }
+
+    // обнулить таблицу регистров
+    for (int i = 0; i < 16; i++)
+        ui->tw_reg->item(i,0)->setText("0");
 }
 
 void MainWindow::on_pushButton_editAsm_clicked() {
