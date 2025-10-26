@@ -9,7 +9,7 @@ void JmpInstruction::execute(unsigned int operand1, unsigned int operand2, unsig
   int metka = getDestinationValue(operand1,operand2,literal,modificator);
 
   qDebug() << "JMP to: " << metka;
-  cpu->setProgramCounter((unsigned int)metka-1);
+  cpu->setProgramCounter(static_cast<unsigned int>(metka-1));
 }
 
 void LoopInstruction::execute(unsigned int operand1, unsigned int operand2, unsigned int literal, unsigned int modificator) {
@@ -20,7 +20,7 @@ void LoopInstruction::execute(unsigned int operand1, unsigned int operand2, unsi
 
   if (cpu->getRegister(2) > 0) {
     cpu->setRegister(2,cpu->getRegister(2)-1);
-    cpu->setProgramCounter((unsigned int)metka-1);
+    cpu->setProgramCounter(static_cast<unsigned int>(metka-1));
   }
 }
 
@@ -31,7 +31,7 @@ void JcInstruction::execute(unsigned int operand1, unsigned int operand2, unsign
   qDebug() << "JC to: " << metka;
 
   if (cpu->flags() & CPUNameSpace::CarryFlag)
-    cpu->setProgramCounter((unsigned int)metka-1);
+    cpu->setProgramCounter(static_cast<unsigned int>(metka-1));
 }
 
 void JncInstruction::execute(unsigned int operand1, unsigned int operand2, unsigned int literal, unsigned int modificator) {
@@ -40,7 +40,7 @@ void JncInstruction::execute(unsigned int operand1, unsigned int operand2, unsig
 
   qDebug() << "JNC to: " << metka;
   if (!(cpu->flags() & CPUNameSpace::CarryFlag))
-    cpu->setProgramCounter((unsigned int)metka-1);
+    cpu->setProgramCounter(static_cast<unsigned int>(metka-1));
 }
 
 void JsInstruction::execute(unsigned int operand1, unsigned int operand2, unsigned int literal, unsigned int modificator) {
@@ -49,7 +49,7 @@ void JsInstruction::execute(unsigned int operand1, unsigned int operand2, unsign
 
   qDebug() << "JS to: " << metka;
   if (cpu->flags() & CPUNameSpace::SignFlag)
-    cpu->setProgramCounter((unsigned int)metka-1);
+    cpu->setProgramCounter(static_cast<unsigned int>(metka-1));
 }
 
 void JnsInstruction::execute(unsigned int operand1, unsigned int operand2, unsigned int literal, unsigned int modificator) {
@@ -57,7 +57,7 @@ void JnsInstruction::execute(unsigned int operand1, unsigned int operand2, unsig
 
   qDebug() << "JNS to: " << metka;
   if (!(cpu->flags() & CPUNameSpace::SignFlag))
-    cpu->setProgramCounter((unsigned int)metka-1);
+    cpu->setProgramCounter(static_cast<unsigned int>(metka-1));
 }
 
 void JzInstruction::execute(unsigned int operand1, unsigned int operand2, unsigned int literal, unsigned int modificator) {
@@ -65,7 +65,7 @@ void JzInstruction::execute(unsigned int operand1, unsigned int operand2, unsign
 
   qDebug() << "JZ to: " << metka;
   if (cpu->flags() & CPUNameSpace::ZeroFlag)
-    cpu->setProgramCounter((unsigned int)metka-1);
+    cpu->setProgramCounter(static_cast<unsigned int>(metka-1));
 }
 
 void JnzInstruction::execute(unsigned int operand1, unsigned int operand2, unsigned int literal, unsigned int modificator) {
@@ -73,5 +73,5 @@ void JnzInstruction::execute(unsigned int operand1, unsigned int operand2, unsig
 
   qDebug() << "JNZ to: " << metka;
   if (!(cpu->flags() & CPUNameSpace::ZeroFlag))
-    cpu->setProgramCounter((unsigned int)metka-1);
+    cpu->setProgramCounter(static_cast<unsigned int>(metka-1));
 }

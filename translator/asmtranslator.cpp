@@ -41,6 +41,8 @@ bool AsmTranslator::translate(QString text, Memory * mem) {
     // если в .data - записываем с начала памяти как данные
     // если в .code - записываем с середины памяти как команды
 
+    if (lst[0] != ".data")
+        return false;
 
     // первый проход - запоминаем адресы, на которые указывают
     // переменные в .data
@@ -89,7 +91,7 @@ bool AsmTranslator::translate(QString text, Memory * mem) {
             // записываем все что есть в память
             for (int j = 0; j < values.length(); j++) {
                 int number = values[j].toInt();
-                unsigned int val = (unsigned int)number;
+                unsigned int val = static_cast<unsigned int>(number);
                 mem->write(cell, val);
                 cell += 1;
             }
@@ -343,7 +345,7 @@ unsigned int AsmTranslator::getModificator(unsigned int destType, unsigned int s
             result += destType;
         }
     }
-    // destination без source (для инструкций перехода)
+    // destination без source
     else if (destType != 0) {
         switch (destType) {
             case asmTypes::number:
