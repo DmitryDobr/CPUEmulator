@@ -35,11 +35,15 @@ void DivInstruction::execute(unsigned int operand1, unsigned int operand2, unsig
 void IncInstruction::execute(unsigned int operand1, unsigned int operand2, unsigned int literal, unsigned int modificator) {
   int destin = getDestinationValue(operand1, operand2, literal, modificator);
 
+  qDebug() << "INC";
+
   setDestinationValue(operand1, operand2, literal, modificator, destin+1);
 }
 
 void DecInstruction::execute(unsigned int operand1, unsigned int operand2, unsigned int literal, unsigned int modificator) {
   int destin = getDestinationValue(operand1, operand2, literal, modificator);
+
+  qDebug() << "DEC ";
 
   setDestinationValue(operand1, operand2, literal, modificator, destin-1);
 }
@@ -47,6 +51,8 @@ void DecInstruction::execute(unsigned int operand1, unsigned int operand2, unsig
 void CmpInstruction::execute(unsigned int operand1, unsigned int operand2, unsigned int literal, unsigned int modificator) {
   int source = getSourceValue(operand2, literal, modificator);
   int destin = getDestinationValue(operand1, operand2, literal, modificator);
+
+  qDebug() << "CMP" << destin << " with: " << source;
 
   if (destin == source)
     cpu->setFlags(cpu->flags() | CPUNameSpace::ZeroFlag); // поднимаем флаг нуля

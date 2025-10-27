@@ -4,7 +4,7 @@
 
 Memory::Memory(QObject *parent) : QObject(parent) {
     for (int i = 0 ; i < 64; i++)
-        mem[i] = 0;
+      mem[i] = 0;
                           // 00000 000000 000000 00000000000 0000
 //    mem[0]  = 0x70000021; // 01110 000000 000000 00000000010 0001 - MOV REG0, 2
 //    mem[1]  = 0x702003C1; // 01110 000001 000000 00000111100 0001 - MOV REG1, 60
@@ -27,7 +27,7 @@ unsigned int Memory::read(unsigned int addr) const {
   if (addr < 64)
     return mem[addr];
   else
-      return 0;
+    return 0;
 }
 
 void Memory::write(unsigned int addr, unsigned int val) {

@@ -16,7 +16,7 @@ public:
 
   void clear();
 
-  void* dataPtr() const { return (void*)mem;}
+  unsigned int* dataPtr() { return &mem[0];}
 
 signals:
   void cellUpdated(unsigned int addr, unsigned int val);

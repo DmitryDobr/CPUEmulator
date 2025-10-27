@@ -8,15 +8,14 @@ CPU::CPU(QObject *parent) : QObject(parent) {
   CPUMemory = new Memory(this);
   connect(CPUMemory, SIGNAL(cellUpdated(unsigned int, unsigned int)), this, SIGNAL(memoryCellUpdated(unsigned int, unsigned int)));
 
-
+  // инициализируем регистры
   for (int i = 0; i < 16; i++)
-      registers[i] = 0;
+    registers[i] = 0;
   instructionsSet = new InstructionSet(this, CPUMemory); // инициализация инструкций
 
   // создаем таймер для работы процессора
   mTimer = new QTimer(this);
   connect(mTimer, SIGNAL(timeout()), this, SLOT(update()));
-//  mTimer->start(1000); // частота работы процессора - обновление 1 раз в секунду
 }
 
 CPU::~CPU() {
@@ -38,10 +37,10 @@ void CPU::setRegister(unsigned int reg, unsigned int val) {
 }
 
 void CPU::setPlaying(bool flag) {
-    if (flag)
-        mTimer->start(1000);
-    else
-        mTimer->stop();
+  if (flag)
+    mTimer->start(1000); // частота работы процессора - обновление 1 раз в секунду
+  else
+    mTimer->stop();
 }
 
 void CPU::resetCPU() {
