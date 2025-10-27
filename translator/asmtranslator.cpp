@@ -1,7 +1,7 @@
 #include "asmtranslator.h"
 
-#include <QDebug>
 #include <QRegularExpression>
+#include <QVector>
 
 AsmTranslator::AsmTranslator() {
     // запоминаем имя инструкции и ее номер
@@ -54,8 +54,6 @@ bool AsmTranslator::translate(QString text, Memory * mem) {
             continue;
 
         if (codeSection) {
-            qDebug() << lst[i] << " " << cell;
-
             if (lst[i].contains(":")) {
                 QString NameData = lst[i]; // [0] - имя данных [1] - сами данные
 
@@ -98,7 +96,6 @@ bool AsmTranslator::translate(QString text, Memory * mem) {
         }
     }
 
-    qDebug() << dataLabelsBuffer;
 
     cell = CPUNameSpace::MEMORY_SIZE / 2;
     // второй проход по тексту - пишем команды в память
@@ -107,13 +104,9 @@ bool AsmTranslator::translate(QString text, Memory * mem) {
         if (lst[i].isEmpty() || lst[i].contains(':'))
             continue;
 
-        // запоминаем метку памяти
-        // пишем код команды
         unsigned int instructionCode = 0, operand1 = 0, operand2 = 0, literal = 0, modificator = 0;
+        QString comandString, destinString, sourceString; // для промежуточных результатов операции со строками
 
-        QString comandString, destinString, sourceString;
-
-        qDebug() << lst[i];
         QStringList CmdDestSource = lst[i].split(','); // [0] - код команды + destination ; [1] - source
         CmdDestSource.removeAll(""); // удалить пустые строки
         if (CmdDestSource.length() > 1)
@@ -125,34 +118,22 @@ bool AsmTranslator::translate(QString text, Memory * mem) {
         if (CmdDest.length() > 1)
             destinString = CmdDest[1];
 
-        comandString = comandString.trimmed();
-        destinString = destinString.trimmed();
-        sourceString = sourceString.trimmed();
+        comandString = comandString.trimmed(); // строка с именем команды
+        destinString = destinString.trimmed(); // строка с destination (регистр/память)
+        sourceString = sourceString.trimmed(); // строка с source (регистр/память/литерал)
 
         instructionCode = instructionCodes.value(comandString);
-        qDebug() << "разбор команды :";
 
-        qDebug() << "destin string = " << destinString;
-        qDebug() << "source string = " << sourceString;
-        qDebug() << "-------------------------------------------------";
-
-        QVector <unsigned int> destToken, sourToken;
-
-        qDebug() << "анализ токена destination: ";
+        QVector <unsigned int> destToken, sourToken; // разборка токенов dest source
         destToken = analyseToken(destinString);
-        qDebug() << destToken;
-
-        qDebug() << "анализ токена source: ";
         sourToken = analyseToken(sourceString);
-        qDebug() << sourToken;
 
         if (destToken[0] == asmTypes::readError || sourToken[0] == asmTypes::readError)
             return false;
 
-        modificator = getModificator(destToken[0], sourToken[0]);
+        modificator = getModificator(destToken[0], sourToken[0]); // определяем модификатор
 
         // сборка operand 1 operand 2 literal из destination source и модификатора
-
         if (destToken[0] != asmTypes::empty && sourToken[0] != asmTypes::empty) {
             if (modificator < 6) {
                 operand1 = destToken[1]; // операнд 1 всегда
@@ -189,15 +170,7 @@ bool AsmTranslator::translate(QString text, Memory * mem) {
                 operand1 = destToken[1];
         }
 
-
-        qDebug() << "=================================================";
-        qDebug() << QString("%1").arg(instructionCode, 5, 2, QChar('0'))
-                 << QString("%1").arg(operand1, 6, 2, QChar('0'))
-                 << QString("%1").arg(operand2, 6, 2, QChar('0'))
-                 << QString("%1").arg(literal, 11, 2, QChar('0'))
-                 << QString("%1").arg(modificator, 4, 2, QChar('0'));
-        qDebug() << "=================================================";
-
+        // финальная сборка команды
         unsigned int code = instructionCode;
         code = code << 6;
         code = code | operand1;
@@ -208,11 +181,8 @@ bool AsmTranslator::translate(QString text, Memory * mem) {
         code = code << 4;
         code = code | modificator;
 
-        qDebug() << QString("%1").arg(code,8,16,QChar('0'));
-        qDebug() << "=================================================";
-
-        mem->write(cell,code);
-
+        if (code != 0)
+            mem->write(cell,code);
 
         cell += 1;
     }
@@ -229,75 +199,74 @@ QVector<unsigned int> AsmTranslator::analyseToken(QString token) {
 
     bool flag = true;
     if (token.isEmpty()) {
-        qDebug() << "--> отсутствует";
+        // отсутствует
         result.append(asmTypes::empty); // пустой токен
     }
     else if (token.contains("REG") && !memExpression.match(token).hasMatch()) {
-        qDebug() << "--> это регистр";
+        // это регистр
         result.append(asmTypes::reg);
         result.append(token.remove("REG").toUInt(&flag));
     }
     else if (token.contains("REG") && memExpression.match(token).hasMatch()) {
-        qDebug() << "--> это память из регистра (возможно со смещением)";
-
+        // это память из регистра (возможно со смещением)
         QStringList buf = token.remove("[").remove("]").split('+');
         unsigned int memreg = buf[0].remove("REG").toUInt(&flag); // номер регистра в котором адрес ячейки памяти
 
         // если есть смещение
         if (buf.length() > 1 && flag) {
             if (buf[1].contains("REG")) {
-                qDebug() << "--> это память из регистра с смещением из регистра";
+                // это память из регистра с смещением из регистра
                 result.append(asmTypes::memRegOffsetReg);
                 result.append(memreg);
                 result.append(buf[1].remove("REG").toUInt(&flag)); // смещение записано в регистре
             }
             else {
-                qDebug() << "--> это память из регистра с фиксированным смещением";
+                // это память из регистра с фиксированным смещением
                 result.append(asmTypes::memRegOffsetNum);
                 result.append(memreg);
                 result.append(buf[1].toUInt(&flag)); // фиксированное смещение
             }
         }
         else {
-            qDebug() << "--> это память из регистра без смещения";
+            // это память из регистра без смещения";
             result.append(asmTypes::memReg); // значение адрес памяти в регистре
             result.append(memreg);
         }
     }
     else if (!token.contains("REG") && memExpression.match(token).hasMatch()) {
-        qDebug() << "--> это ячейка памяти";
+        // это ячейка памяти
         QString mem = token.remove("[").remove("]");
         result.append(asmTypes::memCell);
 
         if (dataLabelsBuffer.contains(mem)) {
-            qDebug() << "--> это ячейка памяти взятая по токену";
+            // это ячейка памяти взятая по токену
             result.append(dataLabelsBuffer.value(mem));
         }
         else {
-            qDebug() << "--> это ячейка памяти, взятая напрямую";
+            // это ячейка памяти, взятая напрямую
             result.append(mem.toUInt(&flag));
         }
     }
     else if (dataLabelsBuffer.contains(token)) {
-        qDebug() << "--> это номер ячейки памяти, полученный по токену переменной или секции (считаем как число)";
+        // это номер ячейки памяти, полученный по токену переменной или секции (считаем как число)
         result.append(asmTypes::number);
         result.append(dataLabelsBuffer.value(token));
     }
     else {
-        qDebug() << "--> это числовое значение";
+        // это числовое значение
         result.append(asmTypes::number);
         int val = token.toInt(&flag);
         // числовые значения с отрицанием кладутся только в literal (11 бит) для source
         // отрицательные значения в литерале имеют вид 1хххххххххх
         if (val < 0) {
             // -100
-            unsigned int number = (unsigned int)(-val); // 100 -> 00001100100
+            unsigned int number = static_cast<unsigned int>(-val); // 100 -> 00001100100
             number = number & 0x3FF; // маска литерала, чтоб обрезать все что дальше 11 бит
             number = number | 0x400; // добавить левый бит знака 1124 -> 10001100100
             result.append(number);
         }
         else
-            result.append((unsigned int)val);
+            result.append(static_cast<unsigned int>(val));
     }
 
     // возникла ошибка при чтении токена
