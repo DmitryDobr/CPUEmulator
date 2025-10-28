@@ -31,6 +31,7 @@ HEADERS  += mainwindow.h \
     instruction/arithmetic.h \
     instruction/boolean.h \
     instruction/transition.h \
-    translator/asmtranslator.h
+    translator/asmtranslator.h \
+    instruction/transition.h
 
 FORMS    += mainwindow.ui
