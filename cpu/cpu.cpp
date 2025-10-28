@@ -8,15 +8,14 @@ CPU::CPU(QObject *parent) : QObject(parent) {
   CPUMemory = new Memory(this);
   connect(CPUMemory, SIGNAL(cellUpdated(unsigned int, unsigned int)), this, SIGNAL(memoryCellUpdated(unsigned int, unsigned int)));
 
-
+  // инициализируем регистры
   for (int i = 0; i < 16; i++)
-      registers[i] = 0;
+    registers[i] = 0;
   instructionsSet = new InstructionSet(this, CPUMemory); // инициализация инструкций
 
   // создаем таймер для работы процессора
   mTimer = new QTimer(this);
   connect(mTimer, SIGNAL(timeout()), this, SLOT(update()));
-  mTimer->start(1000); // частота работы процессора - обновление 1 раз в секунду
 }
 
 CPU::~CPU() {
@@ -38,10 +37,19 @@ void CPU::setRegister(unsigned int reg, unsigned int val) {
 }
 
 void CPU::setPlaying(bool flag) {
-    if (flag)
-        mTimer->start();
-    else
-        mTimer->stop();
+  if (flag)
+    mTimer->start(1000); // частота работы процессора - обновление 1 раз в секунду
+  else
+    mTimer->stop();
+}
+
+void CPU::resetCPU() {
+  CPUMemory->clear();
+  pc = CPUNameSpace::MEMORY_SIZE / 2; // ставим счетчик команд
+  for (int i = 0; i < 16; i++) // обнуляем регистры
+    registers[i] = 0;
+  cpuFlags = CPUNameSpace::NoFlag; // ставим нулевые флаги
+  emit updateCPU(pc);
 }
 
 void CPU::update() {
@@ -58,10 +66,11 @@ void CPU::update() {
   if (inst)
     inst->execute(operand1,operand2,literal,modificator);
 
-  emit updateCPU(pc);
 
   if (pc+1 >= CPUNameSpace::MEMORY_SIZE)
     mTimer->stop();
   else
     pc++;
+
+  emit updateCPU(pc);
 }

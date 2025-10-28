@@ -61,6 +61,9 @@ int Instruction::getDestinationValue(unsigned int operand1, unsigned int operand
         // модификатор доступа говорит, что источник - значение в регистре, номер которого в операнде 1
         val = cpu->getRegister(operand1);
     }
+    if (modificator == 7) {
+        val = literal;
+    }
     else {
         if (modificator == 8 || modificator == 12) {
             // модификатор доступа говорит, что источник - значение в ячейке памяти, номер которой в операнде 1

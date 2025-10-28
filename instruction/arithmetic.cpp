@@ -2,8 +2,6 @@
 
 #include "../cpu/cpu.h"
 
-#include <QDebug>
-
 void AddInstruction::execute(unsigned int operand1, unsigned int operand2, unsigned int literal, unsigned int modificator) {
   int source = getSourceValue(operand2, literal, modificator);
   int destin = getDestinationValue(operand1, operand2, literal, modificator);

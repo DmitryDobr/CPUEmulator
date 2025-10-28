@@ -1,6 +1,7 @@
 #include "instructionset.h"
 
 #include "../cpu/cpu.h"
+#include <QDebug>
 
 InstructionSet::InstructionSet(CPU *cpu, Memory *mem) {
   instructions.insert(0x1F, new HltInstruction(cpu, mem)); // 31
