@@ -35,6 +35,12 @@ private slots:
 
     void on_pushButton_editAsm_clicked();
 
+    void highlightMemoryCells();
+
+    void disHighlightMemoryCells();
+
+    void on_checkBox_clicked(bool checked);
+
 private:
   Ui::MainWindow *ui;
 

@@ -1,7 +1,6 @@
 #include "asmtranslator.h"
 
 #include <QRegularExpression>
-#include <QVector>
 
 AsmTranslator::AsmTranslator() {
     // запоминаем имя инструкции и ее номер
@@ -28,11 +27,15 @@ AsmTranslator::AsmTranslator() {
         {"JMP", 0x1A},  // переход
         {"LOOP", 0x1B}, // переход с циклом
     };
+
+    asmLoaded = false; // статус загрузки кода в память
 }
 
 bool AsmTranslator::translate(QString text, Memory * mem) {
 
+    asmLoaded = false;
     dataLabelsBuffer.clear();
+    sectionsEnd.clear();
 
     QStringList lst = text.split("\n");
     unsigned int cell = 0;
@@ -41,8 +44,9 @@ bool AsmTranslator::translate(QString text, Memory * mem) {
     // если в .data - записываем с начала памяти как данные
     // если в .code - записываем с середины памяти как команды
 
-    if (lst[0] != ".data")
-        return false;
+    if (lst[0] != ".data" && lst[0] != ".text")
+        errorString = "Код не начинается с объявления секции";
+
 
     // первый проход - запоминаем адресы, на которые указывают
     // переменные в .data
@@ -58,7 +62,9 @@ bool AsmTranslator::translate(QString text, Memory * mem) {
                 QString NameData = lst[i]; // [0] - имя данных [1] - сами данные
 
                 if (dataLabelsBuffer.contains(NameData.remove(':').trimmed())) // такой токен уже был в коде или неправильный asm-код
-                    return false;
+                    errorString = "Повторное объявление именованной секции: " + NameData.remove(':').trimmed();
+
+                sectionsEnd.append(static_cast<int>(cell)); // конец секции
 
                 dataLabelsBuffer.insert(NameData.trimmed(), cell); // запоминаем что токен указывает на текущую ячейку памяти,
                 // в которую будет перемещаться pc процессора при выполнении кода
@@ -73,14 +79,16 @@ bool AsmTranslator::translate(QString text, Memory * mem) {
             // с этого момента начинается секция с кодами команд
             codeSection = true;
             cell = CPUNameSpace::MEMORY_SIZE / 2;
+            sectionsEnd.append(static_cast<int>(cell)); // начало секции .text
             codestartline = i;
         }
         else {
             // записываем данные в память
             QStringList NameData = lst[i].split(':'); // [0] - имя данных [1] - сами данные
 
-            if (dataLabelsBuffer.contains(NameData[0].trimmed()) || NameData.length() < 2) // такой токен уже был в коде или неправильный asm-код
-                return false;
+            // такой токен уже был в коде или неправильный asm-код
+            if (dataLabelsBuffer.contains(NameData[0].trimmed()) || NameData.length() < 2)
+                errorString = "Повторное объявление именованной секции или ошибка в синтаксисе: " + NameData[0].trimmed();
 
             dataLabelsBuffer.insert(NameData[0].trimmed(), cell); // запоминаем что токен указывает на текущую ячейку памяти,
             // в которой находятся числовые данные
@@ -93,9 +101,9 @@ bool AsmTranslator::translate(QString text, Memory * mem) {
                 mem->write(cell, val);
                 cell += 1;
             }
+            sectionsEnd.append(static_cast<int>(cell)); // конец секции
         }
     }
-
 
     cell = CPUNameSpace::MEMORY_SIZE / 2;
     // второй проход по тексту - пишем команды в память
@@ -129,7 +137,7 @@ bool AsmTranslator::translate(QString text, Memory * mem) {
         sourToken = analyseToken(sourceString);
 
         if (destToken[0] == asmTypes::readError || sourToken[0] == asmTypes::readError)
-            return false;
+            break;
 
         modificator = getModificator(destToken[0], sourToken[0]); // определяем модификатор
 
@@ -181,13 +189,20 @@ bool AsmTranslator::translate(QString text, Memory * mem) {
         code = code << 4;
         code = code | modificator;
 
-        if (code != 0)
+        if (code >= 0x8000000)
             mem->write(cell,code);
+        else
+            continue;
 
         cell += 1;
     }
 
-    return true;
+    // финальное заполнение ячеек концов секций
+    sectionsEnd.append(static_cast<int>(cell)); // конец секции .text
+    sectionsEnd.append(CPUNameSpace::MEMORY_SIZE);
+
+    asmLoaded = true;
+    return asmLoaded;
 }
 
 // для анализа чем является destination и source. В начале вернет числовой код чем является,
@@ -271,6 +286,7 @@ QVector<unsigned int> AsmTranslator::analyseToken(QString token) {
 
     // возникла ошибка при чтении токена
     if (!flag) {
+        errorString = "Ошибка чтения токена: " + token;
         result.clear();
         result.append(asmTypes::readError);
     }

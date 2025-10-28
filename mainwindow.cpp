@@ -8,6 +8,8 @@
 #include <QDesktopServices>
 #include <QUrl>
 
+#include <QMessageBox>
+
 MainWindow::MainWindow(QWidget *parent) :
   QMainWindow(parent),
     ui(new Ui::MainWindow) {
@@ -124,6 +126,7 @@ void MainWindow::on_updatedCPU(unsigned int pCounter) {
 // если в процессе был обновлен регистр
 void MainWindow::on_registerUpdated(unsigned int reg, unsigned int val) {
     ui->tw_reg->item(static_cast<int>(reg),0)->setText(QString::number(static_cast<int>(val)));
+    ui->tw_reg->setCurrentCell(static_cast<int>(reg),0);
 }
 
 // если в процессе была обновлена ячейка памяти
@@ -133,6 +136,7 @@ void MainWindow::on_memoryCellUpdated(unsigned int addr, unsigned int val) {
     ui->tw_mem->item(row,column)->setText(QString::number(static_cast<int>(val)));
 }
 
+// --------------------------------------------------------------------------
 // возобновить выполнение процессора
 void MainWindow::on_pushButton_play_clicked() {
     cpu->setPlaying(true);
@@ -147,6 +151,7 @@ void MainWindow::on_pushButton_pause_clicked() {
     ui->pushButton_play->setEnabled(true);
 }
 
+// --------------------------------------------------------------------------
 // выбор файла
 void MainWindow::on_pushButton_filePick_clicked() {
     QString filePath = QFileDialog::getOpenFileName(this, "Выберите файл");
@@ -208,12 +213,15 @@ void MainWindow::on_pushButton_execAsm_clicked() {
         }
     }
     else {
-        qDebug() << "ошибка чтения";
+        QMessageBox::warning(this,"Ошибка чтения", translator.lastError());
     }
 
     // обнулить таблицу регистров
     for (int i = 0; i < 16; i++)
         ui->tw_reg->item(i,0)->setText("0");
+
+    // подсвечивать ячейки памяти
+    on_checkBox_clicked(ui->checkBox->isChecked());
 }
 
 // вызвать системный редактор
@@ -221,4 +229,65 @@ void MainWindow::on_pushButton_editAsm_clicked() {
     QString filePath = ui->lineEdit_asmFile->text();
     if (!filePath.isEmpty())
         QDesktopServices::openUrl(QUrl::fromLocalFile(filePath));
+}
+
+// --------------------------------------------------------------------------
+// генерации палитры
+QVector<QColor> getColors(int n) {
+    QVector<QColor> colors;
+    colors.reserve(n);
+
+    for (int i = 0; i < n; ++i) {
+        // Равномерное распределение оттенков
+        double hue = static_cast<double>(i) / n;
+
+        // Фиксированные параметры для нежных цветов
+        double saturation = 0.4;  // Умеренная насыщенность
+        double lightness = 0.75;   // Высокая светлота для нежности
+
+        QColor color = QColor::fromHslF(hue, saturation, lightness);
+        colors.append(color);
+    }
+
+    return colors;
+}
+
+// покрасить ячейки памяти чтоб было видно секции и данные
+void MainWindow::highlightMemoryCells() {
+
+    QVector<int> sections = translator.getSectionsEnd();
+    QVector<QColor> map = getColors(sections.length());
+
+    int column = 0;
+    int row = 0;
+    int c = 0;
+    for (int i = 0; i < CPUNameSpace::MEMORY_SIZE; i++) {
+        if (i >= sections[c]) // переход к след.секции
+            c += 1;
+
+        ui->tw_mem->item(row,column)->setBackgroundColor(map[c]);
+
+        if (row == 15) {
+            row = 0;
+            column++;
+        }
+        else
+            row++;
+    }
+}
+
+// вернуть ячейкам в таблице памяти белый цвет
+void MainWindow::disHighlightMemoryCells() {
+    for (int i = 0; i < ui->tw_mem->rowCount(); i++) {
+        for (int j = 0; j < ui->tw_mem->columnCount(); j++)
+            ui->tw_mem->item(i,j)->setBackgroundColor(Qt::white);
+    }
+}
+
+// реагируем на чекбокс изменения подсвечивания ячеек памяти
+void MainWindow::on_checkBox_clicked(bool checked) {
+    if (checked && translator.isLoad())
+        highlightMemoryCells();
+    else
+        disHighlightMemoryCells();
 }

@@ -3,6 +3,7 @@
 
 #include <QString>
 #include <QMap>
+#include <QVector>
 #include <QStringList>
 
 #include "../cpu/cpu.h"
@@ -14,6 +15,12 @@ public:
     AsmTranslator();
 
     bool translate(QString text, Memory * mem);
+
+    QVector <int> getSectionsEnd() {return sectionsEnd;}
+
+    bool isLoad() {return asmLoaded;}
+
+    QString lastError() {return errorString;}
 
 private:
     QVector <unsigned int> analyseToken(QString token);
@@ -38,6 +45,11 @@ private:
     QMap<QString, unsigned int> dataLabelsBuffer;
     // по наименованию section: запоминаем адрес памяти в котором находится первая операция
     // по наименованию переменной объявленной в data. запоминаем адрес памяти, с которого начинается
+
+    QVector <int> sectionsEnd; // запоминает последние ячейки памяти для секций .data .text
+
+    bool asmLoaded;
+    QString errorString; // храним найденные ошибки чтения асссемблера
 
 };
 
