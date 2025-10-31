@@ -84,6 +84,10 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->pushButton_pause->setIcon(ButtonIcon);
     ui->pushButton_pause->setIconSize(QSize(40,40));
 
+    ButtonIcon = QApplication::style()->standardIcon(QStyle::SP_MediaSeekForward);
+    ui->pushButton_oneStep->setIcon(ButtonIcon);
+    ui->pushButton_oneStep->setIconSize(QSize(40,40));
+
     // соединения сигналов процессора с обработчиками
     connect(cpu, SIGNAL(updateCPU(unsigned int)), this, SLOT(on_updatedCPU(unsigned int)));
     connect(cpu, SIGNAL(registerUpdated(unsigned int, unsigned int)), this, SLOT(on_registerUpdated(unsigned int, unsigned int)));
@@ -142,6 +146,7 @@ void MainWindow::on_pushButton_play_clicked() {
     cpu->setPlaying(true);
     ui->pushButton_pause->setEnabled(true);
     ui->pushButton_play->setEnabled(false);
+    ui->pushButton_oneStep->setEnabled(false);
 }
 
 // пауза выполнения процессора
@@ -149,6 +154,12 @@ void MainWindow::on_pushButton_pause_clicked() {
     cpu->setPlaying(false);
     ui->pushButton_pause->setEnabled(false);
     ui->pushButton_play->setEnabled(true);
+    ui->pushButton_oneStep->setEnabled(true);
+}
+
+// выполнить 1 команду
+void MainWindow::on_pushButton_oneStep_clicked() {
+    cpu->update();
 }
 
 // --------------------------------------------------------------------------

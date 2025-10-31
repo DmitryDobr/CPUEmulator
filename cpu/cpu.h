@@ -65,7 +65,7 @@ signals:
 
   void memoryCellUpdated(unsigned int addr, unsigned int val);
 
-private slots:
+public slots:
   void update();
 
 private:
